@@ -1,0 +1,4 @@
+HOST = 'localhost'
+PORT = 54321
+HEIGHT = 700
+WIDTH = 900
