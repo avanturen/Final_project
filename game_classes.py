@@ -2,11 +2,13 @@ import json
 
 
 
-class Character:
+
+class Object:
     def __init__(self, name, x, y):
         self.name = name
         self.x = x
         self.y = y
+
 
     def get_json(self):
         

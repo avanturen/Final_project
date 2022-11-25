@@ -16,6 +16,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 		self.data = self.request.recv(1024).strip()
 		data = json.loads(self.data.decode('utf8'))
 		index = self.search_by_name(data['name'])
+		print("ok")
 		if index != -1:
 			self.characters[index] = data
 		else:
