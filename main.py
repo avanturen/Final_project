@@ -41,7 +41,7 @@ class Player(Object):
 class Game:
 
     colliders = []
-
+    collider_map = 'collide_map.csv'
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font, player) -> None:
         self.screen = screen
         self.clock = clock
@@ -68,7 +68,7 @@ class Game:
 
 
     def parse_colliders(self):
-        with open('collide_map.csv') as f:
+        with open(self.collider_map) as f:
             for line in f.readlines():
                 line = list(map(int, line.split()))
                 self.colliders.append(Collider(line[0], line[1], line[2], line[3]))
