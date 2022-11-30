@@ -1,15 +1,9 @@
 import pygame
 import numpy as np
 import math
+import camera
 from config import *
-
-
-class Collider:
-    def __init__(self, x1, y1, x2, y2):
-        self.x1 = x1
-        self.x2 = x2
-        self.y1 = y1
-        self.y2 = y2
+import numpy as np
 
 class Object:
     def __init__(self, x, y, texture):
@@ -21,25 +15,24 @@ class Object:
 
 
 
-class Player(Object):
-    def __init__(self, x, y, v, texture):
-        super().__init__(x, y, texture)
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x,y, v, filename):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(filename).convert_alpha()
+        self.rect = self.image.get_rect(center=(x, y))
         self.v = v
 
     def move(self, direction):
-        self.x += self.v * direction[0]
-        self.y -= self.v * direction[1]
+        self.rect.x += self.v * direction[0]
+        self.rect.y -= self.v * direction[1]
 
-    def render(self, screen):
-        #FIX
-        pygame.draw.circle(screen, GREEN, (self.x, self.y), 20)
     
 
 
 
 
 class Game:
-
+    _map = None
     colliders = []
     collider_map = 'collide_map.csv'
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font, player) -> None:
@@ -50,6 +43,10 @@ class Game:
         self.player = player
     def start(self) -> None:
         """Game start"""
+        self._map = pygame.image.load('1level.png').convert_alpha()
+        map_pixels = pygame.surfarray.array2d(self._map)
+    
+        
         self.parse_colliders()
         finished = False
         while not finished:
@@ -57,37 +54,39 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     finished = True
+            map_surface = pygame.pixelcopy.make_surface(camera.camera_move(self.player.rect.x, self.player.rect.y, map_pixels))
+            self.screen.blit(map_surface, (0,0))
             keys = pygame.key.get_pressed()
-
             self.player.move(self.collision_handing(self.player, self.get_direction(keys)))
-            self.player.render(self.screen)
-            self.render_colliders()
+            self.screen.blit(self.player.image, (WIDTH//2, HEIGHT//2))
             pygame.display.update()
-
-            self.screen.fill(BLACK)
+            #self.screen.blit(self._map, (0,0))
 
 
     def parse_colliders(self):
         with open(self.collider_map) as f:
             for line in f.readlines():
                 line = list(map(int, line.split()))
-                self.colliders.append(Collider(line[0], line[1], line[2], line[3]))
+                self.colliders.append(pygame.Rect((line[0], line[1], line[2] - line[1], line[3] - line[1])))
 
     
 
-
     def collision_handing(self, player, direction):
-        playerx = player.x + direction[0] * player.v
-        playery = player.y - direction[1] * player.v
         for collider in self.colliders:
-            deltax1 = playerx - collider.x1
-            deltax2 = collider.x2 - playerx
-            deltay1 = playery - collider.y1
-            deltay2 = collider.y2 - playery
-            if (deltax1 * deltax2 >= 0) and (deltay1 * deltay2 >= 0):
-                if (deltax1 < player.v ) or (deltax2 < player.v):
+            if direction[0] > 0:
+                deltax = player.rect.right - collider.left - direction[0] * player.v
+            else:
+                deltax = collider.right - player.rect.left + direction[0] * player.v
+            if direction[1] > 0:
+                deltay = collider.bottom - player.rect.top - direction[1] * player.v
+            else:
+                deltay = player.rect.bottom + direction[1] * player.v - collider.top
+                
+            
+            if pygame.Rect.colliderect(collider, player.rect):
+                if deltax < player.v:
                     direction[0] = 0
-                if (deltay1 < player.v) or (deltay2 < player.v):
+                if deltay < player.v:
                     direction[1] = 0
                 
         return direction
@@ -95,7 +94,7 @@ class Game:
 
     def render_colliders(self):
         for collider in self.colliders:
-            pygame.draw.rect(self.screen, RED, (collider.x1, collider.y1, collider.x2 - collider.x1, collider.y2 - collider.y1))
+            pygame.draw.rect(self.screen, RED, collider)
 
     def get_direction(self, keys):
         direction = np.array([0,0])
@@ -133,7 +132,7 @@ def init():
 def main():
     """Main function"""
     screen, font_style, clock = init()
-    player = Player(500, 500, 5, 50)
+    player = Player(700, 700, 20, 'player.png')
     game = Game(screen, clock, 500, font_style, player)
     game.start()
     pygame.quit()
