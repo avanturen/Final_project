@@ -54,20 +54,38 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     finished = True
-            map_surface = pygame.pixelcopy.make_surface(camera.camera_move(self.player.rect.x, self.player.rect.y, map_pixels))
+            if self.player.rect.x <= WIDTH//2:
+                x_to_array = WIDTH//2
+                x_to_render = self.player.rect.x
+            elif self.player.rect.x >= map_pixels.shape[0] - WIDTH//2:
+                x_to_array = map_pixels.shape[0] - WIDTH//2
+                x_to_render = self.player.rect.x - map_pixels.shape[0] + WIDTH
+            else:
+                x_to_array = self.player.rect.x
+                x_to_render = WIDTH//2
+            if self.player.rect.y <= HEIGHT//2:
+                y_to_array = HEIGHT//2
+                y_to_render = self.player.rect.y
+            elif self.player.rect.y >= map_pixels.shape[1] - HEIGHT//2:
+                y_to_array = map_pixels.shape[1] - HEIGHT//2
+                y_to_render = self.player.rect.y - map_pixels.shape[1] + HEIGHT + 1
+            else:
+                y_to_array = self.player.rect.y
+                y_to_render = HEIGHT//2
+            print(self.player.rect.x, self.player.rect.y)
+            map_surface = pygame.pixelcopy.make_surface(camera.camera_move(x_to_array, y_to_array, map_pixels))
             self.screen.blit(map_surface, (0,0))
             keys = pygame.key.get_pressed()
             self.player.move(self.collision_handing(self.player, self.get_direction(keys)))
-            self.screen.blit(self.player.image, (WIDTH//2, HEIGHT//2))
+            self.screen.blit(self.player.image, (x_to_render, y_to_render))
             pygame.display.update()
-            #self.screen.blit(self._map, (0,0))
 
 
     def parse_colliders(self):
         with open(self.collider_map) as f:
             for line in f.readlines():
                 line = list(map(int, line.split()))
-                self.colliders.append(pygame.Rect((line[0], line[1], line[2] - line[1], line[3] - line[1])))
+                self.colliders.append(pygame.Rect((line[0], line[1], line[2] - line[0], line[3] - line[1])))
 
     
 
