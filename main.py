@@ -92,11 +92,11 @@ class Game:
     def collision_handing(self, player, direction):
         for collider in self.colliders:
             if direction[0] > 0:
-                deltax = player.rect.right - collider.left - direction[0] * player.v
+                deltax = player.rect.right - collider.left - direction[0] * player.v/2
             else:
-                deltax = collider.right - player.rect.left + direction[0] * player.v
+                deltax = collider.right - player.rect.left + direction[0] * player.v/2
             if direction[1] > 0:
-                deltay = collider.bottom - player.rect.top - direction[1] * player.v
+                deltay = collider.bottom - player.rect.top - direction[1] * player.v/2
             else:
                 deltay = player.rect.bottom + direction[1] * player.v - collider.top
                 
