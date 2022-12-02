@@ -1,8 +1,8 @@
 import numpy as np
 from config import *
 
-def camera_move(x, y, pic):
-    return pic[x-WIDTH//2: x + WIDTH//2, y - HEIGHT//2: y + HEIGHT//2]
+def camera_move(x, y):
+    return (x-WIDTH//2, y - HEIGHT//2, x + WIDTH//2, y + HEIGHT//2)
 
 
 def edge_handing(x, y, width, height):

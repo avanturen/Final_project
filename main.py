@@ -110,8 +110,6 @@ def init():
 def loop(game):
     game._map = pygame.image.load('1level.png').convert_alpha()
     map_pixels = pygame.surfarray.array2d(game._map)
-
-    
     game.parse_colliders()
     finished = False
     while not finished:
@@ -121,8 +119,7 @@ def loop(game):
                 finished = True
         
         x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y, map_pixels.shape[0], map_pixels.shape[1])
-        map_surface = pygame.pixelcopy.make_surface(camera.camera_move(x_to_array, y_to_array, map_pixels))
-        game.screen.blit(map_surface, (0,0))
+        game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
         keys = pygame.key.get_pressed()
         game.player.move(game.collision_handing(game.player, game.get_direction(keys)))
         game.screen.blit(game.player.image, (x_to_render, y_to_render))
