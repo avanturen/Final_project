@@ -41,45 +41,6 @@ class Game:
         self.spawn_time = spawn_time
         self.font_style = font_style
         self.player = player
-    def start(self) -> None:
-        """Game start"""
-        self._map = pygame.image.load('1level.png').convert_alpha()
-        map_pixels = pygame.surfarray.array2d(self._map)
-    
-        
-        self.parse_colliders()
-        finished = False
-        while not finished:
-            self.clock.tick(FPS)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    finished = True
-            if self.player.rect.x <= WIDTH//2:
-                x_to_array = WIDTH//2
-                x_to_render = self.player.rect.x
-            elif self.player.rect.x >= map_pixels.shape[0] - WIDTH//2:
-                x_to_array = map_pixels.shape[0] - WIDTH//2
-                x_to_render = self.player.rect.x - map_pixels.shape[0] + WIDTH
-            else:
-                x_to_array = self.player.rect.x
-                x_to_render = WIDTH//2
-            if self.player.rect.y <= HEIGHT//2:
-                y_to_array = HEIGHT//2
-                y_to_render = self.player.rect.y
-            elif self.player.rect.y >= map_pixels.shape[1] - HEIGHT//2:
-                y_to_array = map_pixels.shape[1] - HEIGHT//2
-                y_to_render = self.player.rect.y - map_pixels.shape[1] + HEIGHT + 1
-            else:
-                y_to_array = self.player.rect.y
-                y_to_render = HEIGHT//2
-            print(self.player.rect.x, self.player.rect.y)
-            map_surface = pygame.pixelcopy.make_surface(camera.camera_move(x_to_array, y_to_array, map_pixels))
-            self.screen.blit(map_surface, (0,0))
-            keys = pygame.key.get_pressed()
-            self.player.move(self.collision_handing(self.player, self.get_direction(keys)))
-            self.screen.blit(self.player.image, (x_to_render, y_to_render))
-            pygame.display.update()
-
 
     def parse_colliders(self):
         with open(self.collider_map) as f:
@@ -146,15 +107,33 @@ def init():
     return (screen, font_style, clock)
 
 
+def loop(game):
+    game._map = pygame.image.load('1level.png').convert_alpha()
+    map_pixels = pygame.surfarray.array2d(game._map)
 
-def main():
-    """Main function"""
+    
+    game.parse_colliders()
+    finished = False
+    while not finished:
+        game.clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finished = True
+        
+        x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y, map_pixels.shape[0], map_pixels.shape[1])
+        map_surface = pygame.pixelcopy.make_surface(camera.camera_move(x_to_array, y_to_array, map_pixels))
+        game.screen.blit(map_surface, (0,0))
+        keys = pygame.key.get_pressed()
+        game.player.move(game.collision_handing(game.player, game.get_direction(keys)))
+        game.screen.blit(game.player.image, (x_to_render, y_to_render))
+        pygame.display.update()
+    pygame.quit()
+
+def start():
     screen, font_style, clock = init()
     player = Player(900, 700, 10, 'player.png')
     game = Game(screen, clock, 500, font_style, player)
-    game.start()
-    pygame.quit()
-
-
+    return game
 if __name__ == '__main__':
-    main()
+    game = start()
+    loop(game)
