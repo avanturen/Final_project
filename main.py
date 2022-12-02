@@ -16,14 +16,29 @@ class Object:
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x,y, v, filename):
+    def __init__(self, x, y, v, filename):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(filename).convert_alpha()
-        self.rect = self.image.get_rect(center=(x, y))
+        self.rect = pygame.Rect(x - 45, y - 140, 110, 280)
         self.v = v
+        self.sprites = [((5, 10), (105, 10)), ((240, 10), (400, 10), (35, 300)), ((160, 300), (265, 300), (380, 300)), ((530, 10), (510, 300))]
+        self.in_motion = True
+        self.direction = 1
+        self.animation_tik = 0
 
     def draw(self, screen, x, y):
-        screen.blit(game.player.image, (x, y))
+        if self.in_motion:
+            self.animation_tik += 0.05
+        match self.direction:
+            case 1:
+                to_draw = 1
+            case 2:
+                to_draw = 2
+            case 0:
+                to_draw = 0
+            case 3:
+                to_draw = 3
+        screen.blit(self.image, (x, y), (*self.sprites[to_draw][int(self.animation_tik) % len(self.sprites[to_draw])], 110, 280))
 
     def move(self, direction):
         self.rect.x += self.v * direction[0]
@@ -75,20 +90,27 @@ class Game:
         for collider in self.colliders:
             pygame.draw.rect(self.screen, RED, collider)
 
-    def get_direction(self, keys):
+    def get_direction(self, keys, player):
         direction = np.array([0,0])
-        if keys[pygame.K_RIGHT]:
-            direction[0] += 1
-        if keys[pygame.K_LEFT]:
-            direction[0] -= 1
         if keys[pygame.K_DOWN]:
             direction[1] -= 1
-        if keys[pygame.K_UP]:
+            player.direction = 1
+        elif keys[pygame.K_UP]:
             direction[1] += 1
+            player.direction = 2
+        if keys[pygame.K_RIGHT]:
+            direction[0] += 1
+            player.direction = 0
+        elif keys[pygame.K_LEFT]:
+            direction[0] -= 1
+            player.direction = 3
+        
         
         norm =  np.linalg.norm(direction)
         if norm:
+            player.in_motion = True
             return direction/norm
+        player.in_motion = False
         return direction
 
 
@@ -114,7 +136,7 @@ def loop(game):
         x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y, map_pixels.shape[0], map_pixels.shape[1])
         keys = pygame.key.get_pressed()
         game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
-        game.player.move(game.collision_handing(game.player, game.get_direction(keys)))
+        game.player.move(game.collision_handing(game.player, game.get_direction(keys, game.player)))
         game.player.draw(game.screen, x_to_render, y_to_render)
         pygame.display.update()
     pygame.quit()
