@@ -22,6 +22,9 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.v = v
 
+    def draw(self, screen, x, y):
+        screen.blit(game.player.image, (x, y))
+
     def move(self, direction):
         self.rect.x += self.v * direction[0]
         self.rect.y -= self.v * direction[1]
@@ -48,8 +51,6 @@ class Game:
                 line = list(map(int, line.split()))
                 self.colliders.append(pygame.Rect((line[0], line[1], line[2] - line[0], line[3] - line[1])))
 
-    
-
     def collision_handing(self, player, direction):
         for collider in self.colliders:
             if direction[0] > 0:
@@ -69,7 +70,6 @@ class Game:
                     direction[1] = 0
                 
         return direction
-
 
     def render_colliders(self):
         for collider in self.colliders:
@@ -91,12 +91,6 @@ class Game:
             return direction/norm
         return direction
 
-    
-
-
-
-
-
 
 def init():
     """Initialize game"""
@@ -108,7 +102,7 @@ def init():
 
 
 def loop(game):
-    game._map = pygame.image.load('1level.png').convert_alpha()
+    game._map = pygame.image.load('assets/1level.png').convert_alpha()
     map_pixels = pygame.surfarray.array2d(game._map)
     game.parse_colliders()
     finished = False
@@ -117,18 +111,17 @@ def loop(game):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 finished = True
-        
         x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y, map_pixels.shape[0], map_pixels.shape[1])
-        game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
         keys = pygame.key.get_pressed()
+        game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
         game.player.move(game.collision_handing(game.player, game.get_direction(keys)))
-        game.screen.blit(game.player.image, (x_to_render, y_to_render))
+        game.player.draw(game.screen, x_to_render, y_to_render)
         pygame.display.update()
     pygame.quit()
 
 def start():
     screen, font_style, clock = init()
-    player = Player(900, 700, 10, 'player.png')
+    player = Player(900, 700, 10, 'assets/player.png')
     game = Game(screen, clock, 500, font_style, player)
     return game
 if __name__ == '__main__':
