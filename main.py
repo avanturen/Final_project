@@ -26,7 +26,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x += self.v * direction[0]
         self.rect.y -= self.v * direction[1]
 
-    
+
 
 
 
@@ -92,11 +92,11 @@ class Game:
     def collision_handing(self, player, direction):
         for collider in self.colliders:
             if direction[0] > 0:
-                deltax = player.rect.right - collider.left - direction[0] * player.v/2
+                deltax = player.rect.right - collider.left - direction[0] * player.v
             else:
-                deltax = collider.right - player.rect.left + direction[0] * player.v/2
+                deltax = collider.right - player.rect.left + direction[0] * player.v
             if direction[1] > 0:
-                deltay = collider.bottom - player.rect.top - direction[1] * player.v/2
+                deltay = collider.bottom - player.rect.top - direction[1] * player.v
             else:
                 deltay = player.rect.bottom + direction[1] * player.v - collider.top
                 
@@ -150,7 +150,7 @@ def init():
 def main():
     """Main function"""
     screen, font_style, clock = init()
-    player = Player(700, 700, 20, 'player.png')
+    player = Player(900, 700, 10, 'player.png')
     game = Game(screen, clock, 500, font_style, player)
     game.start()
     pygame.quit()
