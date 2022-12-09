@@ -1,5 +1,5 @@
 import pygame
-from random import choice, randint as rnd
+import numpy as np
 import math
 import camera
 from config import *
@@ -11,35 +11,6 @@ class Object:
         self.x = x
         self.y = y
         self.texture = texture
-
-
-class Target:
-    def __init__(self, screen):
-        self.points = 0
-        self.live = 1
-        self.screen = screen
-        self.x = rnd(0, 2700)
-        self.y = rnd(0, 3600)
-        self.r = 50
-        self.color = RED
-
-        self.flag = 1
-
-    def new_target(self):
-        """создание цели"""
-        self.x = rnd(0, 2700)
-        self.y = rnd(0, 3600)
-        self.r = 50
-        self.live = 1
-        self.flag = 1
-
-    def loot(self, points=1):
-        """Попадание шарика в цель."""
-        self.points += points
-
-    def draw(self, screen, x, y, r):
-        pygame.draw.circle(screen, self.color, x, y, r)
-
 
 
 class Player(pygame.sprite.Sprite):
@@ -72,32 +43,20 @@ class Player(pygame.sprite.Sprite):
     def move(self, direction):
         self.rect.x += self.v * direction[0]
         self.rect.y -= self.v * direction[1]
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> parent of 5397e84 (НОВАЯ ИГРА)
 
 
 class Game:
     _map = None
     colliders = []
     collider_map = 'collide_map.csv'
-<<<<<<< HEAD
 
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font,
                  player) -> None:
-=======
-    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font, player) -> None:
->>>>>>> parent of 5397e84 (НОВАЯ ИГРА)
         self.screen = screen
         self.clock = clock
         self.spawn_time = spawn_time
         self.font_style = font_style
         self.player = player
-        self.target = Target(screen)
 
     def parse_colliders(self):
         with open(self.collider_map) as f:
@@ -115,12 +74,7 @@ class Game:
                 deltay = collider.bottom - player.rect.top - direction[1] * player.v
             else:
                 deltay = player.rect.bottom + direction[1] * player.v - collider.top
-<<<<<<< HEAD
 
-=======
-                
-            
->>>>>>> parent of 5397e84 (НОВАЯ ИГРА)
             if pygame.Rect.colliderect(collider, player.rect):
                 if deltax < player.v:
                     direction[0] = 0
@@ -162,7 +116,6 @@ def init():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     font_style = pygame.font.Font(None, 36)
     clock = pygame.time.Clock()
-
     return (screen, font_style, clock)
 
 
@@ -182,9 +135,7 @@ def loop(game):
         game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
         game.player.move(game.collision_handing(game.player, game.get_direction(keys, game.player)))
         game.player.draw(game.screen, x_to_render, y_to_render)
-
         pygame.display.update()
-
     pygame.quit()
 
 
@@ -198,3 +149,4 @@ def start():
 if __name__ == '__main__':
     game = start()
     loop(game)
+
