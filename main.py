@@ -130,10 +130,6 @@ class Player(pygame.sprite.Sprite):
         self.rect.y -= self.v * direction[1]
 
 
-
-
-
-
 class Game:
     _map = None
     colliders = []
@@ -162,14 +158,13 @@ class Game:
                 deltay = collider.bottom - player.rect.top - direction[1] * player.v
             else:
                 deltay = player.rect.bottom + direction[1] * player.v - collider.top
-                
-            
+
             if pygame.Rect.colliderect(collider, player.rect):
                 if deltax < player.v:
                     direction[0] = 0
                 if deltay < player.v:
                     direction[1] = 0
-                
+
         return direction
 
     def render_colliders(self):
@@ -177,7 +172,7 @@ class Game:
             pygame.draw.rect(self.screen, RED, collider)
 
     def get_direction(self, keys, player):
-        direction = np.array([0,0])
+        direction = np.array([0, 0])
         if keys[pygame.K_DOWN]:
             direction[1] -= 1
             player.direction = 1
@@ -190,9 +185,8 @@ class Game:
         elif keys[pygame.K_LEFT]:
             direction[0] -= 1
             player.direction = 3
-        
-        
-        norm =  np.linalg.norm(direction)
+
+        norm = np.linalg.norm(direction)
         if norm:
             player.animator.start_animation()
             return direction/norm
@@ -219,7 +213,8 @@ def loop(game):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 finished = True
-        x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y, map_pixels.shape[0], map_pixels.shape[1])
+        x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y,
+                                                                               map_pixels.shape[0], map_pixels.shape[1])
         keys = pygame.key.get_pressed()
         game.enemy_controler.add_time(1/FPS)
         game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
@@ -228,12 +223,16 @@ def loop(game):
         pygame.display.update()
     pygame.quit()
 
+
 def start():
     screen, font_style, clock = init()
     player = Player(900, 700, 10, 'assets/player.png')
     game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 9000000000, 1, player))
     game.enemy_controler.spawn_enemy()
     return game
+
+
 if __name__ == '__main__':
     game = start()
     loop(game)
+
