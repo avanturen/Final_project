@@ -2,6 +2,8 @@ import pygame
 import numpy as np
 import math
 import camera
+from player import Player
+from enemy_controller import Enemy_Controller
 from random import randint
 from config import *
 import numpy as np
@@ -13,121 +15,6 @@ def get_range(x1, y1, x2, y2):
 def get_direction(x1, y1, x2, y2):
     direction = np.array([x2-x1, y2 - y1])
     return direction / np.linalg.norm(direction)
-
-class Animation :
-    def __init__(self, animation_sprites, animation_delay) -> None:
-        self.animation_sprites = animation_sprites
-        self.animation_delay = animation_delay
-        self.time = 0
-        self.animation_iterator = 0
-    
-    def add_time(self, delta_time):
-        self.time += delta_time
-        if self.time > self.animation_delay:
-            self.time = self.time % self.animation_delay
-            self.animation_iterator += 1
-            self.animation_iterator = self.animation_iterator % len(self.animation_sprites)
-    
-    def get_sprite(self):
-        return self.animation_sprites[self.animation_iterator]
-
-class Animator:
-    def __init__(self, animation_dictionary) -> None:
-        self.animation_dictionary = animation_dictionary
-        self.current_animation = self.animation_dictionary[0]
-        self.animated = False
-
-    def set_animation(self, key):
-        self.current_animation = self.animation_dictionary[key]
-
-    def stop_animation(self):
-        self.animated = False
-        self.current_animation.animation_iterator = 0
-     
-    def start_animation(self):
-        self.animated = True
-
-    def get_sprite(self, delta_time):
-        if self.animated:
-            self.current_animation.add_time(delta_time)
-        sprite = self.current_animation.get_sprite()
-        return sprite
-    
-    
-class Enemy:
-    def __init__(self, x, y, v, vision_range) -> None:
-        self.x = x
-        self.y = y
-        self.v = v
-        self.vision_range = vision_range
-        self.direction = [0,0]
-
-
-
-    def search_player(self, player):
-        if (get_range(self.x, self.y, player.rect.x, player.rect.y) < self.vision_range):
-            self.direction = get_direction(self.x, self.y, player.rect.x, player.rect.y)
-        else:
-            self.direction = [0, 0]
-    
-    def move(self):
-        print(self.x, self.y)
-        self.x += self.direction[0] * self.v
-        self.y += self.direction[1] * self.v
-
-class Enemy_Controller:
-    def __init__(self, screen, spawn_time, enemy_power, player) -> None:
-        self.screen = screen
-        self.spawn_time = spawn_time
-        self.enemy_power = enemy_power
-        self.enemies = []
-        self.timer = 0
-        self.player = player
-    
-    def add_time(self, delta_time):
-        self.timer += delta_time
-        if self.timer > self.spawn_time:
-            self.timer = self.timer % self.spawn_time
-            self.spawn_enemy()
-        self.move_enemies()
-
-    def move_enemies(self):
-        for enemy in self.enemies:
-            enemy.search_player(self.player)
-            enemy.move()
-
-
-    def spawn_enemy(self):   
-        self.enemies.append(Enemy(randint(0, 3600), randint(0, 2700), 20, 500))
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, v, filename):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(filename).convert_alpha()
-        self.rect = pygame.Rect(x - 45, y - 140, 110, 280)
-        self.v = v
-        self.sprites = [((5, 10), (105, 10)), ((240, 10), (400, 10), (35, 300)), ((160, 300), (265, 300), (380, 300)), ((530, 10), (510, 300))]
-        Animations = []
-        for i in self.sprites:
-            Animations.append(Animation(i, 20))
-        self.animator = Animator(Animations)
-        self.direction = 1
-
-    def draw(self, screen, x, y):
-        match self.direction:
-            case 1:
-                self.animator.set_animation(1)
-            case 2:
-                self.animator.set_animation(2)
-            case 0:
-                self.animator.set_animation(0)
-            case 3:
-                self.animator.set_animation(3)
-        screen.blit(self.image, (x, y), (*self.animator.get_sprite(1), 110, 280))
-
-    def move(self, direction):
-        self.rect.x += self.v * direction[0]
-        self.rect.y -= self.v * direction[1]
 
 
 class Game:
@@ -167,6 +54,11 @@ class Game:
 
         return direction
 
+    
+    def health_render(self):
+        health = self.font_style.render(f'{self.player.health}', False, (0, 200, 0))
+        self.screen.blit(health, (10,50))
+
     def render_colliders(self):
         for collider in self.colliders:
             pygame.draw.rect(self.screen, RED, collider)
@@ -203,6 +95,7 @@ def init():
     return (screen, font_style, clock)
 
 
+
 def loop(game):
     game._map = pygame.image.load('assets/1level.png').convert_alpha()
     map_pixels = pygame.surfarray.array2d(game._map)
@@ -217,9 +110,13 @@ def loop(game):
                                                                                map_pixels.shape[0], map_pixels.shape[1])
         keys = pygame.key.get_pressed()
         game.enemy_controler.add_time(1/FPS)
+        game.enemy_controler.is_atack()
+        game.enemy_controler.is_atacked()
         game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
+        game.enemy_controler.draw_enemy(x_to_array, y_to_array)
         game.player.move(game.collision_handing(game.player, game.get_direction(keys, game.player)))
         game.player.draw(game.screen, x_to_render, y_to_render)
+        game.health_render()
         pygame.display.update()
     pygame.quit()
 
@@ -227,7 +124,7 @@ def loop(game):
 def start():
     screen, font_style, clock = init()
     player = Player(900, 700, 10, 'assets/player.png')
-    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 9000000000, 1, player))
+    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 2, 1, player))
     game.enemy_controler.spawn_enemy()
     return game
 
