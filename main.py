@@ -62,7 +62,8 @@ class Enemy:
         self.vision_range = vision_range
         self.direction = [0,0]
 
-
+    def draw(self, screen, x, y):
+        pygame.draw.rect(screen, RED, (self.x - x - 10 + WIDTH/2, self.y - y - 10 + HEIGHT/2, 100, 100))
 
     def search_player(self, player):
         if (get_range(self.x, self.y, player.rect.x, player.rect.y) < self.vision_range):
@@ -90,6 +91,10 @@ class Enemy_Controller:
             self.timer = self.timer % self.spawn_time
             self.spawn_enemy()
         self.move_enemies()
+
+    def draw_enemy(self, x, y):
+        for i in self.enemies:
+            i.draw(self.screen, x, y)
 
     def move_enemies(self):
         for enemy in self.enemies:
@@ -216,6 +221,7 @@ def loop(game):
         x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y,
                                                                                map_pixels.shape[0], map_pixels.shape[1])
         keys = pygame.key.get_pressed()
+        
         game.enemy_controler.add_time(1/FPS)
         game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
         game.player.move(game.collision_handing(game.player, game.get_direction(keys, game.player)))
