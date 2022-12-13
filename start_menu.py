@@ -50,8 +50,8 @@ while running:
                 menu.switch(1)
             elif e.key == K_SPACE:
                 menu.select()
-
-    screen.fill((0, 0, 0))
+    menu_bg = pygame.image.load("assets/menubg.png")
+    screen.blit(menu_bg, (0,0))
     menu.draw(screen, 100, 100, 75)
 
     display.flip()
