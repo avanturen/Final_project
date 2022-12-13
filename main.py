@@ -30,6 +30,10 @@ class Game:
         self.player = player
         self.enemy_controler = enemy_controller
 
+    def health_render(self):
+        health = self.font_style.render(f'{self.player.health}', False, (0, 200, 0))
+        self.screen.blit(health, (10,50))
+
     def parse_colliders(self):
         with open(self.collider_map) as f:
             for line in f.readlines():
@@ -106,8 +110,12 @@ def loop(game):
         keys = pygame.key.get_pressed()
         
         game.enemy_controler.add_time(1/FPS)
+        game.enemy_controler.is_atack()
+        game.enemy_controler.is_atacked()
         game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
+        game.enemy_controler.draw_enemy(x_to_array, y_to_array)
         game.player.move(game.collision_handing(game.player, game.get_direction(keys, game.player)))
+        game.health_render()
         game.player.draw(game.screen, x_to_render, y_to_render)
         pygame.display.update()
     pygame.quit()
@@ -116,7 +124,7 @@ def loop(game):
 def start():
     screen, font_style, clock = init()
     player = Player(900, 700, 10, 'assets/player.png')
-    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 9000000000, 1, player))
+    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 2, 1, player))
     game.enemy_controler.spawn_enemy()
     return game
 

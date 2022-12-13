@@ -14,32 +14,37 @@ def get_direction(x1, y1, x2, y2):
 
 class Enemy:
     def __init__(self, x, y, v, vision_range) -> None:
-        self.x = x
-        self.y = y
         self.v = v
         self.vision_range = vision_range
         self.direction = [0,0]
+        self.rect = pygame.Rect(x - 25, y - 25, 50, 50)
+        self.rect_to_draw = pygame.Rect(self.rect.x -25, self.rect.y - 25, 50, 50)
 
     def draw(self, screen, x, y):
-        pygame.draw.rect(screen, RED, (self.x - x - 10 + WIDTH/2, self.y - y - 10 + HEIGHT/2, 100, 100))
+        self.rect_to_draw.x = self.rect.x - x - 10 + WIDTH/2
+        self.rect_to_draw.y = self.rect.y - y - 10 + HEIGHT/2
+        print(self.rect.x, self.rect.y)
+        pygame.draw.rect(screen, RED, self.rect_to_draw)
+
 
     def search_player(self, player):
-        if (get_range(self.x, self.y, player.rect.x, player.rect.y) < self.vision_range):
-            self.direction = get_direction(self.x, self.y, player.rect.x, player.rect.y)
+        if (get_range(self.rect.x, self.rect.y, player.rect.x + player.w/2, player.rect.y + player.h/2) < self.vision_range):
+            self.direction = get_direction(self.rect.x, self.rect.y, player.rect.x + player.w/2, player.rect.y + player.h/2)
         else:
             self.direction = [0, 0]
     
     def move(self):
-        print(self.x, self.y)
-        self.x += self.direction[0] * self.v
-        self.y += self.direction[1] * self.v
+        
+        self.rect.x += self.direction[0] * self.v
+        self.rect.y += self.direction[1] * self.v
 
 class Enemy_Controller:
     def __init__(self, screen, spawn_time, enemy_power, player) -> None:
         self.screen = screen
         self.spawn_time = spawn_time
         self.enemy_power = enemy_power
-        self.enemies = []
+        self.enemies = {}
+        self.enemy_counter = 0
         self.timer = 0
         self.player = player
     
@@ -50,14 +55,32 @@ class Enemy_Controller:
             self.spawn_enemy()
         self.move_enemies()
 
+    def is_atack(self):
+        to_delete = []
+        for (i, enemy) in self.enemies.items():
+            if pygame.Rect.colliderect(enemy.rect, self.player.rect):
+                self.player.take_damage(self.enemy_power)
+                to_delete.append(i)
+        for i in to_delete:
+            self.enemies.pop(i)
+
+    def is_atacked(self):
+        to_delete = []
+        for (i, enemy) in self.enemies.items():
+            for weapon in self.player.weapons:
+                if pygame.Rect.colliderect(enemy.rect, weapon.rect):
+                    to_delete.append(i)
+        for i in to_delete:
+            self.enemies.pop(i)
     def draw_enemy(self, x, y):
-        for i in self.enemies:
+        for i in self.enemies.values():
             i.draw(self.screen, x, y)
 
     def move_enemies(self):
-        for enemy in self.enemies:
+        for enemy in self.enemies.values():
             enemy.search_player(self.player)
             enemy.move()
 
     def spawn_enemy(self):   
-        self.enemies.append(Enemy(randint(0, 3600), randint(0, 2700), 20, 500))
+        self.enemies[self.enemy_counter] = Enemy(randint(0, 3600), randint(0, 2700), 5, 500)
+        self.enemy_counter += 1
