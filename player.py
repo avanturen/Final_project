@@ -7,11 +7,17 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.h = 140
         self.w  = 55
+        self.damage = 10
         self.image = pygame.image.load(filename).convert_alpha()
         self.rect = pygame.Rect(x - self.w/2, y - self.h/2, self.w, self.h)
         self.v = v
+        self.level = 1
+        self.new_level = 0
+        self.exp = 0
+        self.exp_for_lvlup = 100
         self.sprites = [((3, 44), (53, 44)), ((122, 40), (195, 40), (15, 180)), ((75, 180), (130, 180), (190, 180)), ((260, 44), (250, 180))]
         self.health = 100
+        self.max_health = 100
         self.weapons = [Weapon(self, 200, 0.1)]
         Animations = []
         for i in self.sprites:
@@ -21,6 +27,19 @@ class Player(pygame.sprite.Sprite):
 
     def take_damage(self, damage):
         self.health -= damage
+    
+    def heal(self, heal):
+        self.health += heal
+        if self.health > self.max_health:
+            self.health = self.max_health
+
+    def get_exp(self, exp):
+        self.exp += exp
+        if self.exp >= self.exp_for_lvlup:
+            self.exp %= self.exp_for_lvlup
+            self.level += 1
+            self.exp_for_lvlup *= 1.05
+            self.new_level = 1
 
     def draw(self, screen, x, y):
         match self.direction:
@@ -36,12 +55,19 @@ class Player(pygame.sprite.Sprite):
         for weapon in self.weapons:
             pygame.draw.circle(screen, (200, 0, 0), (x + weapon.x + self.w/2, y + weapon.y + self.h/2), 5)
             weapon.move()
-            print(weapon.rect.x, weapon.rect.y)
 
     def move(self, direction):
         self.rect.x += self.v * direction[0]
         self.rect.y -= self.v * direction[1]
 
+
+    def new_weapon(self):
+        new_weapon = Weapon(self, self.weapons[0].r, self.weapons[0].v)
+        self.weapons.append(new_weapon)
+        num = len(self.weapons)
+        for i in range(num):
+            self.weapons[i].s = self.weapons[0].s + 2 * pi * i / num
+    
 
 
 class Weapon:

@@ -6,7 +6,6 @@ from player import Player
 from enemy_controller import Enemy_Controller
 from random import randint
 from config import *
-import numpy as np
 
 
 def get_range(x1, y1, x2, y2):
@@ -18,10 +17,12 @@ def get_direction(x1, y1, x2, y2):
 
 
 class Game:
-    _map = None
+    
     colliders = []
     collider_map = 'collide_map.csv'
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font, player, enemy_controller) -> None:
+        self.lvlups = pygame.image.load('assets/lvlups.png').convert_alpha()
+        self.lvlups_list = [(0, 0), (0, 80), (0, 160), (0, 240), (0, 320)]
         self.screen = screen
         self.clock = clock
         self.spawn_time = spawn_time
@@ -34,6 +35,26 @@ class Game:
             for line in f.readlines():
                 line = list(map(int, line.split()))
                 self.colliders.append(pygame.Rect((line[0], line[1], line[2] - line[0], line[3] - line[1])))
+
+    def add_lvl_up(self, i):
+        match i:
+            case 0:
+                self.player.max_health = int(self.player.max_health * 1.05)
+                self.player.health = int(self.player.health * 1.05)
+            case 1:
+                self.player.heal(self.player.max_health * 0.3)
+            case 2:
+                self.player.v *= 1.05
+            case 3:
+                for weapon in self.player.weapons:
+                    weapon.v *= 1.05
+                self.player.damage *= 1.05
+            case 4:
+                self.player.new_weapon()
+            case 5:
+                self.player.damage *= 1.05
+            
+
 
     def collision_handing(self, player, direction):
         for collider in self.colliders:
@@ -53,6 +74,7 @@ class Game:
                     direction[1] = 0
 
         return direction
+
 
     
     def health_render(self):
@@ -106,17 +128,34 @@ def loop(game):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 finished = True
-        x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y,
-                                                                               map_pixels.shape[0], map_pixels.shape[1])
-        keys = pygame.key.get_pressed()
-        game.enemy_controler.add_time(1/FPS)
-        game.enemy_controler.is_atack()
-        game.enemy_controler.is_atacked()
-        game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
-        game.enemy_controler.draw_enemy(x_to_array, y_to_array)
-        game.player.move(game.collision_handing(game.player, game.get_direction(keys, game.player)))
-        game.player.draw(game.screen, x_to_render, y_to_render)
-        game.health_render()
+        if game.player.new_level == 1:
+            pygame.draw.rect(game.screen, BLACK, (WIDTH/2 - 200, HEIGHT/2 - 150, 400, 300))
+            en = list(enumerate(game.lvlups_list))
+            np.random.shuffle(en)
+            rects = []
+            for i in range(3):
+                game.screen.blit(game.lvlups, (WIDTH/2 - 190, HEIGHT/2 - 140 + 100 * i), (*en[i][1], 380, 80))
+                rects.append([en[i][0], pygame.rect.Rect(WIDTH/2 - 190, HEIGHT/2 - 140 + 100 * i, 380, 80)])
+            game.player.new_level = 2
+        elif game.player.new_level == 2:
+            if pygame.mouse.get_pressed()[0]:
+                position = pygame.mouse.get_pos()
+                for (i, rect) in rects:
+                    if pygame.rect.Rect.collidepoint(rect, *position):
+                        game.add_lvl_up(i)
+                        game.player.new_level = 0
+        else:
+            x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y,
+                                                                                map_pixels.shape[0], map_pixels.shape[1])
+            keys = pygame.key.get_pressed()
+            game.enemy_controler.add_time(1/FPS)
+            game.enemy_controler.is_atack()
+            game.enemy_controler.is_atacked()
+            game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
+            game.enemy_controler.draw_enemy(x_to_array, y_to_array)
+            game.player.move(game.collision_handing(game.player, game.get_direction(keys, game.player)))
+            game.player.draw(game.screen, x_to_render, y_to_render)
+            game.health_render()
         pygame.display.update()
     pygame.quit()
 
@@ -124,7 +163,7 @@ def loop(game):
 def start():
     screen, font_style, clock = init()
     player = Player(900, 700, 10, 'assets/player.png')
-    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 2, 1, player))
+    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 0.2, 10, player, 10))
     game.enemy_controler.spawn_enemy()
     return game
 
