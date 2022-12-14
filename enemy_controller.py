@@ -82,6 +82,7 @@ class Enemy_Controller:
         for (i, enemy) in self.enemies.items():
             for weapon in self.player.weapons:
                 if pygame.Rect.colliderect(enemy.rect, weapon.rect):
+                    self.player.heal(self.player.vampire * self.player.damage)
                     if enemy.get_damage(self.player.damage):
                         to_delete.append(i)
                         self.player.get_exp(self.exp_for_enemy)

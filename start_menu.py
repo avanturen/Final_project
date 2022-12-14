@@ -1,6 +1,5 @@
 import pygame
 from config import *
-from pygame import *
 import main
 
 pygame.init()
@@ -29,7 +28,7 @@ class Menu:
             option_rect = option.get_rect()
             option_rect.topleft = (x, y + i * distance)
             if i == self.current:
-                draw.rect(surface, (100, 100, 75), option_rect)
+                pygame.draw.rect(surface, (100, 100, 75), option_rect)
             surface.blit(option, option_rect)
 
 
@@ -40,19 +39,19 @@ menu.new_option("quit", lambda: pygame.quit())
 running = True
 
 while running:
-    for e in event.get():
-        if e.type == QUIT:
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
             running = False
-        elif e.type == KEYDOWN:
-            if e.key == K_w:
+        elif e.type == pygame.KEYDOWN:
+            if e.key == pygame.K_w:
                 menu.switch(-1)
-            elif e.key == K_s:
+            elif e.key == pygame.K_s:
                 menu.switch(1)
-            elif e.key == K_SPACE:
+            elif e.key == pygame.K_SPACE:
                 menu.select()
     menu_bg = pygame.image.load("assets/menubg.png")
     screen.blit(menu_bg, (0,0))
     menu.draw(screen, 100, 100, 75)
 
-    display.flip()
+    pygame.display.flip()
 quit()

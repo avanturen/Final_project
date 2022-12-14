@@ -53,6 +53,8 @@ class Game:
                 self.player.new_weapon()
             case 5:
                 self.player.damage *= 1.05
+            case 6:
+                self.player.vampire += 0.05
             
 
 

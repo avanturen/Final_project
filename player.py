@@ -19,6 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.health = 100
         self.max_health = 100
         self.weapons = [Weapon(self, 200, 0.1)]
+        self.vampire = 0
         Animations = []
         for i in self.sprites:
             Animations.append(Animation(i, 20))
