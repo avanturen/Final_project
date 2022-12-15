@@ -45,7 +45,7 @@ class Player(pygame.sprite.Sprite):
         self.sprites = [((10, 3), (65, 3)), ((126, 3), (202, 3), (16, 150)), ((76, 150), (134, 150), (192, 150)), ((17, 293), (83, 293))]
         self.health = 100
         self.max_health = 100
-        self.orbits = [Orbit([], 200, 0.07, self.damage, 10, (200, 0, 0)), Orbit([Weapon(self, 150, -0.035, 20)], 150, -0.035, self.damage*4, 15, (139, 0, 255))]
+        self.orbits = [Orbit([], 200, 0.07, self.damage, 10, (200, 0, 0)), Orbit([Weapon(self, 150, -0.035, 20)], 150, -0.035, self.damage*4, 20, (139, 0, 255))]
         self.death = False
         self.vampire = 0
         Animations = []
@@ -94,7 +94,6 @@ class Player(pygame.sprite.Sprite):
             case 3:
                 self.animator.set_animation(3)
         screen.blit(self.image, (x, y), (*self.animator.get_sprite(1), self.w, self.h))
-        pygame.draw.rect(screen, (255, 0, 0), (x, y, self.rect.width, self.rect.height))
         for orbit in self.orbits:
             for weapon in orbit.weapons:
                 pygame.draw.circle(screen, orbit.color, (x + weapon.x + self.w/2, y + weapon.y + self.h/2), weapon.Radius)

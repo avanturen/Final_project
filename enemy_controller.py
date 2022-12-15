@@ -1,6 +1,6 @@
 from config import *
 import pygame
-from math import atan2, pi, sqrt
+from math import atan2, pi, sqrt, sin, cos
 from random import randint, random
 import numpy as np
 from animations import Animation, Animator
@@ -39,7 +39,6 @@ class Enemy:
             self.rect_to_draw = image.get_rect(center = self.rect.center)
             self.rect_to_draw.x = self.rect.x - x - 10 + WIDTH/2
             self.rect_to_draw.y = self.rect.y - y - 10 + HEIGHT/2
-            pygame.draw.rect(screen, GREEN, self.rect_to_draw)
             screen.blit(image, (self.rect_to_draw.x, self.rect_to_draw.y))
 
 
@@ -118,7 +117,7 @@ class Enemy_Controller:
                             to_delete.append(i)
                             self.player.get_exp(self.exp_for_enemy * sqrt(1 + enemy.type))
                             exp +=  int(self.exp_for_enemy * sqrt(1 + enemy.type))
-                            self.player.heal(orbit.damage * orbit.vampire * 10)
+                            self.player.heal(orbit.damage * orbit.vampire * 2)
         to_delete = set(to_delete)
         for i in to_delete:
             self.enemies.pop(i)
@@ -135,5 +134,7 @@ class Enemy_Controller:
 
     def spawn_enemy(self):
         for i in range(self.max_enemies - len(self.enemies)):
-            self.enemies[self.enemy_counter] = Enemy(randint(0, 3600), randint(0, 2700), 5, 500, 60 * self.enemy_power / 10)
+            r = random()* 1000 + 400
+            angle = random() * 2 * pi
+            self.enemies[self.enemy_counter] = Enemy(self.player.rect.x + r * cos(angle), self.player.rect.y + r * sin(angle), 4, 500, 60 * self.enemy_power / 10)
             self.enemy_counter += 1

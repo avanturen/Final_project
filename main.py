@@ -37,6 +37,9 @@ class Menu:
             surface.blit(option, option_rect)
 
 
+
+
+
 ending_menu = Menu()
 ending_menu.new_option("start", lambda: game_start())
 ending_menu.new_option("quit", lambda: pygame.quit())
@@ -47,7 +50,7 @@ starting_menu.new_option("start", lambda: game_start())
 starting_menu.new_option("quit", lambda: pygame.quit())
 
 running = True    
-
+name = 'legenda'
 
 def get_range(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
@@ -132,9 +135,7 @@ class Game:
             case 2:
                 self.enemy_controler.damage_reduce *= 0.9
             case 3:
-                for orbit in self.player.orbits:
-                    orbit.set_speed(1.2)
-                self.player.damage *= 1.2
+                self.player.orbits[0].new_weapon(self.player)
             case 4:
                 for orbit in self.player.orbits:
                     orbit.set_damage(1.1)
@@ -254,6 +255,8 @@ def loop(game):
             game.render_exp()
             game.render_level()
         if game.player.death:
+            with open('leaderboard.csv', 'a') as f:
+                f.write(f'{name}, {game.score}\n')
             break
         pygame.display.update()
     end_menu()
