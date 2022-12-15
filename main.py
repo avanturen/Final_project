@@ -126,6 +126,7 @@ class Game:
         self.screen.blit(lvl, (10,190))
 
     def add_lvl_up(self, i):
+        
         match i:
             case 0:
                 self.player.max_health = int(self.player.max_health * 1.2)

@@ -4,7 +4,9 @@ from math import atan2, pi, sqrt, sin, cos
 from random import randint, random
 import numpy as np
 from animations import Animation, Animator
+"""Анимации врагов"""
 path = [['assets/enemy-1.png', 'assets/enemy-2.png', 'assets/enemy-3.png'], ['assets/enemy-4.png', 'assets/enemy-5.png', 'assets/enemy-6.png'], ['assets/enemy-7.png', 'assets/enemy-8.png', 'assets/enemy-9.png']]
+
 def get_range(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
@@ -33,6 +35,7 @@ class Enemy:
         self.visible = False
 
     def draw(self, screen, x, y):
+        """Отрисовка врага"""
         if self.visible:
             image = pygame.transform.rotate(self.animator.get_sprite(1),  -atan2(self.direction[1], self.direction[0]) * 180 / pi)
             self.rect = image.get_rect(center = self.rect.center)
@@ -43,6 +46,7 @@ class Enemy:
 
 
     def is_in_wall(self, walls):
+        """Проверка, в стене ли враг"""
         collide = pygame.rect.Rect.collidelist(self.rect, walls)
         if (collide < 0) or (collide > 14):
             self.visible = True
@@ -50,17 +54,19 @@ class Enemy:
             self.visible = False
 
     def get_damage(self, damage):
+        """Функция, наносящая врагу урон"""
         self.health -= damage
         if self.health <= 0:
             return True
         return False
 
     def search_player(self, player):
+        """функция, которая ориентирует движение врагов в направлении игрока"""
         self.direction = get_direction(self.rect.x, self.rect.y, player.rect.x + player.w/2, player.rect.y + player.h/2)
         self.animator.start_animation()
     
     def move(self):
-        
+        """движение врага"""
         self.rect.x += self.direction[0] * self.v
         self.rect.y += self.direction[1] * self.v
 
@@ -80,10 +86,12 @@ class Enemy_Controller:
         self.player = player
     
     def wall_handler(self, walls):
+        """Проверка, видно ли врагов"""
         for enemy in self.enemies.values():
             enemy.is_in_wall(walls)
 
     def add_time(self, delta_time):
+        """Добавляет время к игровому таймеру"""
         self.timer += delta_time
         self.power_up_timer += delta_time
         if self.timer > self.spawn_time:
@@ -96,6 +104,7 @@ class Enemy_Controller:
         self.move_enemies()
 
     def is_atack(self):
+        """Проверка, атакует ли враг игрока"""
         to_delete = []
         for (i, enemy) in self.enemies.items():
             if pygame.Rect.colliderect(enemy.rect, self.player.rect):
@@ -106,6 +115,7 @@ class Enemy_Controller:
 
     
     def is_atacked(self):
+        """Функция, проверяющая, атакован ли враг, и в зависимости от результата наносящая ему урон"""
         to_delete = []
         exp = 0
         for (i, enemy) in self.enemies.items():
@@ -124,15 +134,18 @@ class Enemy_Controller:
         self.spawn_enemy()
         return exp
     def draw_enemy(self, x, y):
+        """Отрирсовка врагов"""
         for i in self.enemies.values():
             i.draw(self.screen, x, y)
 
     def move_enemies(self):
+        """Движение врагов"""
         for enemy in self.enemies.values():
             enemy.search_player(self.player)
             enemy.move()
 
     def spawn_enemy(self):
+        """Появление врагов"""
         for i in range(self.max_enemies - len(self.enemies)):
             r = random()* 1000 + 400
             angle = random() * 2 * pi

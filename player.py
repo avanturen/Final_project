@@ -40,6 +40,7 @@ class Player(pygame.sprite.Sprite):
         self.v = v
         self.level = 1
         self.new_level = 0
+
         self.exp = 0
         self.exp_for_lvlup = 100
         self.sprites = [((10, 3), (65, 3)), ((126, 3), (202, 3), (16, 150)), ((76, 150), (134, 150), (192, 150)), ((17, 293), (83, 293))]
@@ -105,9 +106,15 @@ class Player(pygame.sprite.Sprite):
         self.rect.y -= self.v * direction[1]
 
     """Добавление нового оружия"""
+    def new_weapon(self):
+        new_weapon = Weapon(self, self.weapons[0].r, self.weapons[0].v)
+        self.weapons.append(new_weapon)
+        num = len(self.weapons)
+        for i in range(num):
+            self.weapons[i].s = self.weapons[0].s + 2 * pi * i / num
     
 
-"""класс оружия"""
+
 class Weapon:
     def __init__(self, player, r, v, Radius) -> None:
         self.r = r
@@ -119,8 +126,9 @@ class Weapon:
         self.player = player
         self.rect = pygame.Rect(player.rect.x + r + player.w/2 - self.Radius, player.rect.y + player.h/2 - self.Radius, 2 * self.Radius, self.Radius)
 
-    """движение оружия"""
+    
     def move(self):
+        """движение оружия"""
         self.s += self.v
         self.s = self.s % (2 * pi)
         self.y = sin(self.s) * self.r

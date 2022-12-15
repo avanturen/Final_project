@@ -15,11 +15,13 @@ class Menu:
     def new_option(self, option, function):
         self.options_bottoms.append(font1.render(option, True, RED))
         self.functions.append(function)
-
+    
     def switch(self, direction):
+        """Меняет выбранную в данный момент опцию в меню"""
         self.current = max(0, min(self.current + direction, len(self.options_bottoms) - 1))
 
     def select(self):
+        """выбор опции в меню"""
         self.functions[self.current]()
 
     def draw(self, surface, x, y, distance):
@@ -35,8 +37,9 @@ menu = Menu()
 menu.new_option("start", lambda: main.game_start())
 menu.new_option("quit", lambda: pygame.quit())
 
-running = True
+
 def show_menu():
+    """цикл меню"""
     running = True
     while running:
         for e in pygame.event.get():
