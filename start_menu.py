@@ -33,9 +33,7 @@ class Menu:
             surface.blit(option, option_rect)
 
 
-menu = Menu()
-menu.new_option("start", lambda: main.game_start())
-menu.new_option("quit", lambda: pygame.quit())
+
 
 running = True
 """игровой цикл меню"""

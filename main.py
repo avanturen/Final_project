@@ -6,8 +6,47 @@ from player import Player
 from enemy_controller import Enemy_Controller
 from random import randint
 from config import *
+from death_menu import show_menu
+
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+font1 = pygame.font.SysFont('arial', 50)
 
 
+class Menu:
+    def __init__(self):
+        self.options_bottoms = []
+        self.functions = []
+        self.current = 0
+
+    def new_option(self, option, function):
+        self.options_bottoms.append(font1.render(option, True, RED))
+        self.functions.append(function)
+
+    def switch(self, direction):
+        self.current = max(0, min(self.current + direction, len(self.options_bottoms) - 1))
+
+    def select(self):
+        self.functions[self.current]()
+
+    def draw(self, surface, x, y, distance):
+        for i, option in enumerate(self.options_bottoms):
+            option_rect = option.get_rect()
+            option_rect.topleft = (x, y + i * distance)
+            if i == self.current:
+                pygame.draw.rect(surface, (100, 100, 75), option_rect)
+            surface.blit(option, option_rect)
+
+
+ending_menu = Menu()
+ending_menu.new_option("start", lambda: game_start())
+ending_menu.new_option("quit", lambda: pygame.quit())
+
+
+starting_menu = Menu()
+starting_menu.new_option("start", lambda: game_start())
+starting_menu.new_option("quit", lambda: pygame.quit())
+
+running = True    
 
 
 def get_range(x1, y1, x2, y2):
@@ -17,6 +56,46 @@ def get_direction(x1, y1, x2, y2):
     direction = np.array([x2-x1, y2 - y1])
     return direction / np.linalg.norm(direction)
 
+def start_menu():
+    running = True
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            elif e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_w:
+                    starting_menu.switch(-1)
+                elif e.key == pygame.K_s:
+                    starting_menu.switch(1)
+                elif e.key == pygame.K_SPACE:
+                    starting_menu.select()
+        menu_bg = pygame.image.load("assets/menubg.png")
+        screen.blit(menu_bg, (0,0))
+        starting_menu.draw(screen, 200, 400, 75)
+
+        pygame.display.flip()
+    quit()
+
+def end_menu():
+    running = True
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            elif e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_w:
+                    ending_menu.switch(-1)
+                elif e.key == pygame.K_s:
+                    ending_menu.switch(1)
+                elif e.key == pygame.K_SPACE:
+                    ending_menu.select()
+        menu_bg = pygame.image.load("assets/menu2.png")
+        screen.blit(menu_bg, (0,0))
+        ending_menu.draw(screen, 200, 400, 75)
+
+        pygame.display.flip()
+    quit()
+
 
 class Game:
     
@@ -24,7 +103,7 @@ class Game:
     collider_map = 'collide_map.csv'
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font, player, enemy_controller) -> None:
         self.lvlups = pygame.image.load('assets/lvlups.png').convert_alpha()
-        self.lvlups_list = [(0, 0), (0, 80), (0, 160), (0, 240), (0, 320)]
+        self.lvlups_list = [(0, 0), (0, 80), (0, 160), (0, 240), (0, 320), (0, 400)]
         self.screen = screen
         self.clock = clock
         self.spawn_time = spawn_time
@@ -39,28 +118,34 @@ class Game:
                 line = list(map(int, line.split()))
                 self.colliders.append(pygame.Rect((line[0], line[1], line[2] - line[0], line[3] - line[1])))
 
+    def render_level(self):
+        lvl = self.font_style.render(f'Level: {self.player.level}', False, (255, 255, 255))
+        self.screen.blit(lvl, (10,190))
+
     def add_lvl_up(self, i):
         
         match i:
             case 0:
-                self.player.max_health = int(self.player.max_health * 1.05)
-                self.player.health = int(self.player.health * 1.05)
+                self.player.max_health = int(self.player.max_health * 1.2)
+                self.player.health = int(self.player.health * 1.2)
             case 1:
                 self.player.heal(self.player.max_health * 0.3)
             case 2:
-                self.player.v *= 1.05
+                self.enemy_controler.damage_reduce *= 0.9
             case 3:
-                for weapon in self.player.weapons:
-                    weapon.v *= 1.05
-                self.player.damage *= 1.05
+                for orbit in self.player.orbits:
+                    orbit.set_speed(1.2)
+                self.player.damage *= 1.2
             case 4:
-                self.player.new_weapon()
+                for orbit in self.player.orbits:
+                    orbit.set_damage(1.1)
+                self.player.damage *= 1.1
             case 5:
-                self.player.damage *= 1.05
-            case 6:
-                self.player.vampire += 0.05
+                self.player.orbits[0].vampire += 0.1
             
-
+    def render_exp(self):
+        pygame.draw.rect(self.screen, (170, 170, 170), (10, 90, 300, 30), border_radius = 1)
+        pygame.draw.rect(self.screen, WHITE, (10, 90, self.player.exp/self.player.exp_for_lvlup * 300, 30))
 
     def collision_handing(self, player, direction):
         for collider in self.colliders:
@@ -83,9 +168,9 @@ class Game:
 
     def render_score(self):
         health = self.font_style.render(f'Score: {self.score}', False, (255, 255, 255))
-        self.screen.blit(health, (10,90))
+        self.screen.blit(health, (10,140))
     def health_render(self):
-        health = self.font_style.render(f'{self.player.health} / {self.player.max_health}', False, (0, 200, 0))
+        health = self.font_style.render(f'{int(self.player.health)} / {self.player.max_health}', False, (0, 200, 0))
         self.screen.blit(health, (10,50))
 
     def render_colliders(self):
@@ -167,14 +252,18 @@ def loop(game):
             game.player.draw(game.screen, x_to_render, y_to_render)
             game.health_render()
             game.render_score()
+            game.render_exp()
+            game.render_level()
+        if game.player.death:
+            break
         pygame.display.update()
-    pygame.quit()
+    end_menu()
 
 
 def start():
     screen, font_style, clock = init()
     player = Player(900, 700, 10, 'assets/player.png')
-    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 0.2, 10, player, 10))
+    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 0.2, 10, player, 5))
     game.enemy_controler.spawn_enemy()
     return game
 
@@ -183,5 +272,5 @@ def game_start():
     loop(game)
 
 if __name__ == '__main__':
-    game_start()
+    start_menu()
 

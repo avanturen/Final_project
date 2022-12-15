@@ -42,7 +42,9 @@ class Enemy:
             self.rect_to_draw = image.get_rect(center = self.rect.center)
             self.rect_to_draw.x = self.rect.x - x - 10 + WIDTH/2
             self.rect_to_draw.y = self.rect.y - y - 10 + HEIGHT/2
+            pygame.draw.rect(screen, GREEN, self.rect_to_draw)
             screen.blit(image, (self.rect_to_draw.x, self.rect_to_draw.y))
+
 
     def is_in_wall(self, walls):
         """Проверка, в стене ли враг"""
@@ -78,6 +80,7 @@ class Enemy_Controller:
         self.power_up_time = power_up_time
         self.power_up_timer = 0
         self.enemies = {}
+        self.damage_reduce = 1
         self.exp_for_enemy = enemy_power * 3
         self.enemy_counter = 0
         self.timer = 0
@@ -97,7 +100,7 @@ class Enemy_Controller:
             self.spawn_enemy()
         if self.power_up_timer > self.power_up_time:
             self.power_up_timer %= self.power_up_time
-            self.enemy_power *= 1.1
+            self.enemy_power *= 1.03
             self.max_enemies = int(self.max_enemies * 1.05)
         self.move_enemies()
 
@@ -106,7 +109,7 @@ class Enemy_Controller:
         to_delete = []
         for (i, enemy) in self.enemies.items():
             if pygame.Rect.colliderect(enemy.rect, self.player.rect):
-                self.player.take_damage(self.enemy_power * sqrt(enemy.type + 1))
+                self.player.take_damage(self.enemy_power * sqrt(enemy.type + 1) * self.damage_reduce)
                 to_delete.append(i)
         for i in to_delete:
             self.enemies.pop(i)
@@ -121,10 +124,12 @@ class Enemy_Controller:
                 for weapon in orbit.weapons:
                     if pygame.Rect.colliderect(enemy.rect, weapon.rect):
                         self.player.heal(self.player.vampire * self.player.damage)
-                        if enemy.get_damage(self.player.damage):
+                        if enemy.get_damage(orbit.damage):
                             to_delete.append(i)
                             self.player.get_exp(self.exp_for_enemy * sqrt(1 + enemy.type))
                             exp +=  int(self.exp_for_enemy * sqrt(1 + enemy.type))
+                            self.player.heal(orbit.damage * orbit.vampire * 10)
+        to_delete = set(to_delete)
         for i in to_delete:
             self.enemies.pop(i)
         self.spawn_enemy()
@@ -143,5 +148,5 @@ class Enemy_Controller:
     def spawn_enemy(self):
         """Появление врагов"""
         for i in range(self.max_enemies - len(self.enemies)):
-            self.enemies[self.enemy_counter] = Enemy(randint(0, 3600), randint(0, 2700), self.enemy_power/2, 500, 60)
+            self.enemies[self.enemy_counter] = Enemy(randint(0, 3600), randint(0, 2700), 5, 500, 60 * self.enemy_power / 10)
             self.enemy_counter += 1
