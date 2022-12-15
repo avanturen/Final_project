@@ -56,6 +56,8 @@ class Game:
                 self.player.new_weapon()
             case 5:
                 self.player.damage *= 1.05
+            case 6:
+                self.player.vampire += 0.05
             
 
 
@@ -91,16 +93,16 @@ class Game:
 
     def get_direction(self, keys, player):
         direction = np.array([0, 0])
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_s]:
             direction[1] -= 1
             player.direction = 1
-        elif keys[pygame.K_UP]:
+        elif keys[pygame.K_w]:
             direction[1] += 1
             player.direction = 2
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_d]:
             direction[0] += 1
             player.direction = 0
-        elif keys[pygame.K_LEFT]:
+        elif keys[pygame.K_a]:
             direction[0] -= 1
             player.direction = 3
 
