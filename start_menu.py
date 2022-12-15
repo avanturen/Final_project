@@ -5,7 +5,7 @@ import main
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 font1 = pygame.font.SysFont('arial', 50)
-
+"""функции от сюда перенесеры в main"""
 
 class Menu:
     def __init__(self):
