@@ -40,6 +40,7 @@ class Game:
                 self.colliders.append(pygame.Rect((line[0], line[1], line[2] - line[0], line[3] - line[1])))
 
     def add_lvl_up(self, i):
+        
         match i:
             case 0:
                 self.player.max_health = int(self.player.max_health * 1.05)
@@ -157,6 +158,7 @@ def loop(game):
                                                                                 map_pixels.shape[0], map_pixels.shape[1])
             keys = pygame.key.get_pressed()
             game.enemy_controler.add_time(1/FPS)
+            game.enemy_controler.wall_handler(game.colliders)
             game.enemy_controler.is_atack()
             game.score += game.enemy_controler.is_atacked()
             game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))

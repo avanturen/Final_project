@@ -78,8 +78,9 @@ class Player(pygame.sprite.Sprite):
             self.weapons[i].s = self.weapons[0].s + 2 * pi * i / num
     
 
-"""класс оружия"""
+
 class Weapon:
+    """класс оружия"""
     def __init__(self, player, r, v) -> None:
         self.r = r
         self.v = v
@@ -89,8 +90,9 @@ class Weapon:
         self.player = player
         self.rect = pygame.Rect(player.rect.x + r + player.w/2 - 5, player.rect.y + player.h/2 - 5, 10, 10)
 
-    """движение оружия"""
+    
     def move(self):
+        """движение оружия"""
         self.s += self.v
         self.s = self.s % (2 * pi)
         self.y = sin(self.s) * self.r
