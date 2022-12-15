@@ -6,6 +6,7 @@ def camera_move(x, y):
 
 
 def edge_handing(x, y, width, height):
+    """Останавливает движение камеры при приближении к краю"""
     if x <= WIDTH//2:
         x_to_array = WIDTH//2
         x_to_render =  x
