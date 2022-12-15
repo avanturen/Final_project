@@ -2,6 +2,21 @@ from math import pi, sin, cos
 import pygame
 from animations import Animation, Animator
 
+
+class Orbit:
+    def __init__(self, weapons, r, speed, damage) -> None:
+        self.weapons = weapons
+        self.r = r
+        self.speed = speed
+        self.damage = damage
+
+    def new_weapon(self, player):
+        new_weapon = Weapon(player, self.r, self.speed)
+        self.weapons.append(new_weapon)
+        num = len(self.weapons)
+        for i in range(num):
+            self.weapons[i].s = self.weapons[0].s + 2 * pi * i / num
+
 """класс игрока"""
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, v, filename):
@@ -14,13 +29,12 @@ class Player(pygame.sprite.Sprite):
         self.v = v
         self.level = 1
         self.new_level = 0
-
         self.exp = 0
         self.exp_for_lvlup = 100
         self.sprites = [((10, 3), (65, 3)), ((126, 3), (202, 3), (16, 150)), ((76, 150), (134, 150), (192, 150)), ((17, 293), (83, 293))]
         self.health = 100
         self.max_health = 100
-        self.weapons = [Weapon(self, 200, 0.1)]
+        self.orbits = [Orbit([Weapon(self, 200, 0.1)], 200, 0.1, self.damage), Orbit([Weapon(self, 100, 0.05)], 100, 0.05, self.damage*4)]
         self.vampire = 0
         Animations = []
         for i in self.sprites:
@@ -45,8 +59,12 @@ class Player(pygame.sprite.Sprite):
         if self.exp >= self.exp_for_lvlup:
             self.exp %= self.exp_for_lvlup
             self.level += 1
-            self.exp_for_lvlup *= 1.05
+            self.exp_for_lvlup *= 1.2
             self.new_level = 1
+            if self.level % 2 == 0:
+                self.orbits[0].new_weapon(self)
+            else:
+                self.orbits[1].new_weapon(self)
 
     """функция рисования персонажа"""
     def draw(self, screen, x, y):
@@ -60,9 +78,10 @@ class Player(pygame.sprite.Sprite):
             case 3:
                 self.animator.set_animation(3)
         screen.blit(self.image, (x, y), (*self.animator.get_sprite(1), self.w, self.h))
-        for weapon in self.weapons:
-            pygame.draw.circle(screen, (200, 0, 0), (x + weapon.x + self.w/2, y + weapon.y + self.h/2), 5)
-            weapon.move()
+        for orbit in self.orbits:
+            for weapon in orbit.weapons:
+                pygame.draw.circle(screen, (200, 0, 0), (x + weapon.x + self.w/2, y + weapon.y + self.h/2), 5)
+                weapon.move()
 
     """функция движения персонажа"""
     def move(self, direction):
@@ -70,12 +89,6 @@ class Player(pygame.sprite.Sprite):
         self.rect.y -= self.v * direction[1]
 
     """Добавление нового оружия"""
-    def new_weapon(self):
-        new_weapon = Weapon(self, self.weapons[0].r, self.weapons[0].v)
-        self.weapons.append(new_weapon)
-        num = len(self.weapons)
-        for i in range(num):
-            self.weapons[i].s = self.weapons[0].s + 2 * pi * i / num
     
 
 """класс оружия"""
