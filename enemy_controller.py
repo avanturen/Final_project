@@ -1,8 +1,10 @@
 from config import *
 import pygame
-from random import randint
+from math import atan2, pi, sqrt
+from random import randint, random
 import numpy as np
-
+from animations import Animation, Animator
+path = [['assets/enemy-1.png', 'assets/enemy-2.png', 'assets/enemy-3.png'], ['assets/enemy-4.png', 'assets/enemy-5.png', 'assets/enemy-6.png'], ['assets/enemy-7.png', 'assets/enemy-8.png', 'assets/enemy-9.png']]
 def get_range(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
@@ -10,21 +12,34 @@ def get_direction(x1, y1, x2, y2):
     direction = np.array([x2-x1, y2 - y1])
     return direction / np.linalg.norm(direction)
 
+def get_animation(filenames):
+    animations = []
+    for filename in filenames:
+        
+        animations.append(pygame.transform.scale2x(pygame.image.load(filename).convert_alpha()))
+    return Animation(animations, 20)
 
 
 class Enemy:
     def __init__(self, x, y, v, vision_range, health) -> None:
-        self.v = v
+        self.type = randint(0,2)
+        self.v = 0
+        self.real_v = v/(self.type + 4) * 4
+        self.animator = Animator([get_animation(path[self.type])])
         self.vision_range = vision_range
-        self.health = health
-        self.direction = [0,0]
+        self.health = health * sqrt(self.type + 1)
+        self.direction = [(random() - 1) / 200, (random() - 1) / 200]
         self.rect = pygame.Rect(x - 25, y - 25, 50, 50)
         self.rect_to_draw = pygame.Rect(self.rect.x -25, self.rect.y - 25, 50, 50)
 
     def draw(self, screen, x, y):
+        image = pygame.transform.rotate(self.animator.get_sprite(1),  -atan2(self.direction[1], self.direction[0]) * 180 / pi)
+        self.rect = image.get_rect(center = self.rect.center)
+        self.rect_to_draw = image.get_rect(center = self.rect.center)
         self.rect_to_draw.x = self.rect.x - x - 10 + WIDTH/2
         self.rect_to_draw.y = self.rect.y - y - 10 + HEIGHT/2
-        pygame.draw.rect(screen, RED, self.rect_to_draw)
+        pygame.draw.rect(screen, GREEN, self.rect_to_draw)
+        screen.blit(image, (self.rect_to_draw.x, self.rect_to_draw.y))
 
 
     def get_damage(self, damage):
@@ -36,8 +51,11 @@ class Enemy:
     def search_player(self, player):
         if (get_range(self.rect.x, self.rect.y, player.rect.x + player.w/2, player.rect.y + player.h/2) < self.vision_range):
             self.direction = get_direction(self.rect.x, self.rect.y, player.rect.x + player.w/2, player.rect.y + player.h/2)
+            self.v = self.real_v
+            self.animator.start_animation()
         else:
-            self.direction = [0, 0]
+            self.v = 0
+            self.animator.stop_animation()
     
     def move(self):
         
@@ -72,7 +90,7 @@ class Enemy_Controller:
         to_delete = []
         for (i, enemy) in self.enemies.items():
             if pygame.Rect.colliderect(enemy.rect, self.player.rect):
-                self.player.take_damage(self.enemy_power)
+                self.player.take_damage(self.enemy_power * sqrt(enemy.type + 1))
                 to_delete.append(i)
         for i in to_delete:
             self.enemies.pop(i)
@@ -84,10 +102,11 @@ class Enemy_Controller:
                 if pygame.Rect.colliderect(enemy.rect, weapon.rect):
                     if enemy.get_damage(self.player.damage):
                         to_delete.append(i)
-                        self.player.get_exp(self.exp_for_enemy)
-                    print(self.player.level)
+                        self.player.get_exp(self.exp_for_enemy * sqrt(1 + enemy.type))
+                        return int(self.exp_for_enemy * sqrt(1 + enemy.type))
         for i in to_delete:
             self.enemies.pop(i)
+        return 0
     def draw_enemy(self, x, y):
         for i in self.enemies.values():
             i.draw(self.screen, x, y)

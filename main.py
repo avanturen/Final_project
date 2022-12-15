@@ -8,6 +8,8 @@ from random import randint
 from config import *
 
 
+
+
 def get_range(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
@@ -29,6 +31,7 @@ class Game:
         self.font_style = font_style
         self.player = player
         self.enemy_controler = enemy_controller
+        self.score = 0
 
     def parse_colliders(self):
         with open(self.collider_map) as f:
@@ -75,10 +78,11 @@ class Game:
 
         return direction
 
-
-    
+    def render_score(self):
+        health = self.font_style.render(f'Score: {self.score}', False, (255, 255, 255))
+        self.screen.blit(health, (10,90))
     def health_render(self):
-        health = self.font_style.render(f'{self.player.health}', False, (0, 200, 0))
+        health = self.font_style.render(f'{self.player.health} / {self.player.max_health}', False, (0, 200, 0))
         self.screen.blit(health, (10,50))
 
     def render_colliders(self):
@@ -118,6 +122,8 @@ def init():
 
 
 
+
+
 def loop(game):
     game._map = pygame.image.load('assets/1level.png').convert_alpha()
     map_pixels = pygame.surfarray.array2d(game._map)
@@ -150,12 +156,13 @@ def loop(game):
             keys = pygame.key.get_pressed()
             game.enemy_controler.add_time(1/FPS)
             game.enemy_controler.is_atack()
-            game.enemy_controler.is_atacked()
+            game.score += game.enemy_controler.is_atacked()
             game.screen.blit(game._map, (0, 0), camera.camera_move(x_to_array, y_to_array))
             game.enemy_controler.draw_enemy(x_to_array, y_to_array)
             game.player.move(game.collision_handing(game.player, game.get_direction(keys, game.player)))
             game.player.draw(game.screen, x_to_render, y_to_render)
             game.health_render()
+            game.render_score()
         pygame.display.update()
     pygame.quit()
 
