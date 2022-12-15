@@ -17,6 +17,7 @@ class Menu:
         self.options_bottoms.append(font1.render(option, True, RED))
         self.functions.append(function)
 
+    """Меняет выбранную в данный момент опцию в меню"""
     def switch(self, direction):
         self.current = max(0, min(self.current + direction, len(self.options_bottoms) - 1))
 
@@ -37,7 +38,7 @@ menu.new_option("start", lambda: main.game_start())
 menu.new_option("quit", lambda: pygame.quit())
 
 running = True
-
+"""игровой цикл меню"""
 while running:
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
