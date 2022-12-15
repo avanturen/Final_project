@@ -17,7 +17,7 @@ class Player(pygame.sprite.Sprite):
 
         self.exp = 0
         self.exp_for_lvlup = 100
-        self.sprites = [((3, 44), (53, 44)), ((122, 40), (195, 40), (15, 180)), ((75, 180), (130, 180), (190, 180)), ((260, 44), (250, 180))]
+        self.sprites = [((10, 3), (65, 3)), ((126, 3), (202, 3), (16, 150)), ((76, 150), (134, 150), (192, 150)), ((17, 293), (83, 293))]
         self.health = 100
         self.max_health = 100
         self.weapons = [Weapon(self, 200, 0.1)]
