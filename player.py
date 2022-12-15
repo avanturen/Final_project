@@ -2,6 +2,7 @@ from math import pi, sin, cos
 import pygame
 from animations import Animation, Animator
 
+"""класс игрока"""
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, v, filename):
         pygame.sprite.Sprite.__init__(self)
@@ -13,6 +14,7 @@ class Player(pygame.sprite.Sprite):
         self.v = v
         self.level = 1
         self.new_level = 0
+
         self.exp = 0
         self.exp_for_lvlup = 100
         self.sprites = [((3, 44), (53, 44)), ((122, 40), (195, 40), (15, 180)), ((75, 180), (130, 180), (190, 180)), ((260, 44), (250, 180))]
@@ -26,14 +28,17 @@ class Player(pygame.sprite.Sprite):
         self.animator = Animator(Animations)
         self.direction = 1
 
+    """функция получения урона"""
     def take_damage(self, damage):
         self.health -= damage
-    
+
+    """функция лечения"""
     def heal(self, heal):
         self.health += heal
         if self.health > self.max_health:
             self.health = self.max_health
 
+    """функция получения опыта"""
     def get_exp(self, exp):
         self.exp += exp
         if self.exp >= self.exp_for_lvlup:
@@ -42,6 +47,7 @@ class Player(pygame.sprite.Sprite):
             self.exp_for_lvlup *= 1.05
             self.new_level = 1
 
+    """функция рисования персонажа"""
     def draw(self, screen, x, y):
         match self.direction:
             case 1:
@@ -57,11 +63,12 @@ class Player(pygame.sprite.Sprite):
             pygame.draw.circle(screen, (200, 0, 0), (x + weapon.x + self.w/2, y + weapon.y + self.h/2), 5)
             weapon.move()
 
+    """функция движения персонажа"""
     def move(self, direction):
         self.rect.x += self.v * direction[0]
         self.rect.y -= self.v * direction[1]
 
-
+    """Добавление нового оружия"""
     def new_weapon(self):
         new_weapon = Weapon(self, self.weapons[0].r, self.weapons[0].v)
         self.weapons.append(new_weapon)
@@ -70,7 +77,7 @@ class Player(pygame.sprite.Sprite):
             self.weapons[i].s = self.weapons[0].s + 2 * pi * i / num
     
 
-
+"""класс оружия"""
 class Weapon:
     def __init__(self, player, r, v) -> None:
         self.r = r
@@ -81,6 +88,7 @@ class Weapon:
         self.player = player
         self.rect = pygame.Rect(player.rect.x + r + player.w/2 - 5, player.rect.y + player.h/2 - 5, 10, 10)
 
+    """движение оружия"""
     def move(self):
         self.s += self.v
         self.s = self.s % (2 * pi)
