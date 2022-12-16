@@ -257,8 +257,6 @@ def loop(game):
             game.render_level()
             game.add_time()
         if game.player.death:
-            with open('leaderboard.csv', 'a') as f:
-                f.write(f'{name}, {game.score}\n')
             break
         pygame.display.update()
     draw_menu('assets/menu2.png', -1)
