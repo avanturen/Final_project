@@ -6,7 +6,7 @@ from player import Player
 from enemy_controller import Enemy_Controller
 from random import randint
 from config import *
-from death_menu import show_menu
+pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 font1 = pygame.font.SysFont('arial', 50)
@@ -40,14 +40,11 @@ class Menu:
 
 
 
-ending_menu = Menu()
-ending_menu.new_option("start", lambda: game_start())
-ending_menu.new_option("quit", lambda: pygame.quit())
 
 
-starting_menu = Menu()
-starting_menu.new_option("start", lambda: game_start())
-starting_menu.new_option("quit", lambda: pygame.quit())
+menu = Menu()
+menu.new_option("start", lambda: game_start())
+menu.new_option("quit", lambda: False)
 
 running = True    
 name = 'legenda'
@@ -59,28 +56,8 @@ def get_direction(x1, y1, x2, y2):
     direction = np.array([x2-x1, y2 - y1])
     return direction / np.linalg.norm(direction)
 
-def start_menu():
-    """отрисовка стартового меню"""
-    running = True
-    while running:
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                running = False
-            elif e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_w:
-                    starting_menu.switch(-1)
-                elif e.key == pygame.K_s:
-                    starting_menu.switch(1)
-                elif e.key == pygame.K_SPACE:
-                    starting_menu.select()
-        menu_bg = pygame.image.load("assets/menubg.png")
-        screen.blit(menu_bg, (0,0))
-        starting_menu.draw(screen, 200, 400, 75)
-
-        pygame.display.flip()
-    quit()
-
-def end_menu():
+    
+def draw_menu(filename, score):
     """отрисовка меню после смерти"""
     running = True
     while running:
@@ -89,17 +66,21 @@ def end_menu():
                 running = False
             elif e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_w:
-                    ending_menu.switch(-1)
+                    menu.switch(-1)
                 elif e.key == pygame.K_s:
-                    ending_menu.switch(1)
+                    menu.switch(1)
                 elif e.key == pygame.K_SPACE:
-                    ending_menu.select()
-        menu_bg = pygame.image.load("assets/menu2.png")
+                    running = menu.select()
+        menu_bg = pygame.image.load(filename)
+       
         screen.blit(menu_bg, (0,0))
-        ending_menu.draw(screen, 200, 400, 75)
+        menu.draw(screen, 200, 400, 75)
+        if score >= 0:
+            text = font1.render(f'Your score: {score}', True, RED)
+            screen.blit(text, (760, 720))
 
         pygame.display.flip()
-    quit()
+    pygame.quit()
 
 
 class Game:
@@ -116,6 +97,7 @@ class Game:
         self.player = player
         self.enemy_controler = enemy_controller
         self.score = 0
+        self.timer = 0
 
     def parse_colliders(self):
         """добавление коллизий"""
@@ -186,6 +168,13 @@ class Game:
         """устонавливает коллизии обЪектов"""
         for collider in self.colliders:
             pygame.draw.rect(self.screen, RED, collider)
+
+    def add_time(self):
+        self.timer += 1/FPS
+        if self.timer >= WIN_TIME:
+            draw_menu('assets/menu3.png', self.score)
+        time = self.font_style.render(f'Time: {int((WIN_TIME - self.timer) // 60)} : {int((WIN_TIME - self.timer)%60)}', False, (255, 255, 255))
+        self.screen.blit(time, (10,250))
 
     def get_direction(self, keys, player):
         """считывает нажатия клавиш и задаёт направление игроку"""
@@ -266,12 +255,13 @@ def loop(game):
             game.render_score()
             game.render_exp()
             game.render_level()
+            game.add_time()
         if game.player.death:
             with open('leaderboard.csv', 'a') as f:
                 f.write(f'{name}, {game.score}\n')
             break
         pygame.display.update()
-    end_menu()
+    draw_menu('assets/menu2.png', -1)
 
 
 def start():
@@ -287,5 +277,5 @@ def game_start():
     loop(game)
 
 if __name__ == '__main__':
-    start_menu()
+    draw_menu('assets/menubg.png', -1)
 

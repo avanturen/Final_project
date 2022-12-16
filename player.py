@@ -62,8 +62,6 @@ class Player(pygame.sprite.Sprite):
             self.death = True
     
     def heal(self, heal):
-        if heal != 0:
-            a = 1
         self.health += heal
         self.health = self.health
         if self.health > self.max_health:
