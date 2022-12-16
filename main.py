@@ -6,7 +6,7 @@ from player import Player
 from enemy_controller import Enemy_Controller
 from random import randint
 from config import *
-from death_menu import show_menu
+pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 font1 = pygame.font.SysFont('arial', 50)
@@ -77,7 +77,7 @@ def start_menu():
         starting_menu.draw(screen, 200, 400, 75)
 
         pygame.display.flip()
-    quit()
+    pygame.quit()
 
 def end_menu():
     running = True
@@ -97,7 +97,7 @@ def end_menu():
         ending_menu.draw(screen, 200, 400, 75)
 
         pygame.display.flip()
-    quit()
+    pygame.quit()
 
 
 class Game:
