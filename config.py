@@ -1,5 +1,14 @@
 """файл с данными"""
 FPS = 60
+MENU_FONT = 'arial'
+FILENAME = 'Nikita survive'
+LVLUPS = 'assets/lvlups.png'
+COLLIDE_MAP = 'collide_map.csv'
+START_MENU = 'assets/menubg.png'
+LOSE_MENU = 'assets/menu2.png'
+WIN_MENU = 'assets/menu3.png'
+MAP_LEVEL = 'assets/1level.png'
+PLAYER_SPRITES = 'assets/player.png'
 WIN_TIME = 30
 WIDTH = 1200
 HEIGHT = 900

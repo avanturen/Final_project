@@ -1,6 +1,5 @@
 import pygame
 import numpy as np
-import math
 import camera
 from player import Player
 from enemy_controller import Enemy_Controller
@@ -9,7 +8,7 @@ from config import *
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-font1 = pygame.font.SysFont('arial', 50)
+font1 = pygame.font.SysFont(MENU_FONT, 50)
 
 
 class Menu:
@@ -86,9 +85,9 @@ def draw_menu(filename, score):
 class Game:
     
     colliders = []
-    collider_map = 'collide_map.csv'
+    collider_map = COLLIDE_MAP
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font, player, enemy_controller) -> None:
-        self.lvlups = pygame.image.load('assets/lvlups.png').convert_alpha()
+        self.lvlups = pygame.image.load(LVLUPS).convert_alpha()
         self.lvlups_list = [(0, 0), (0, 80), (0, 160), (0, 240), (0, 320), (0, 400)]
         self.screen = screen
         self.clock = clock
@@ -172,7 +171,7 @@ class Game:
     def add_time(self):
         self.timer += 1/FPS
         if self.timer >= WIN_TIME:
-            draw_menu('assets/menu3.png', self.score)
+            draw_menu(WIN_MENU, self.score)
         time = self.font_style.render(f'Time: {int((WIN_TIME - self.timer) // 60)} : {int((WIN_TIME - self.timer)%60)}', False, (255, 255, 255))
         self.screen.blit(time, (10,250))
 
@@ -214,7 +213,7 @@ def init():
 
 def loop(game):
     """основной игровой цикл"""
-    game._map = pygame.image.load('assets/1level.png').convert_alpha()
+    game._map = pygame.image.load(MAP_LEVEL).convert_alpha()
     map_pixels = pygame.surfarray.array2d(game._map)
     game.parse_colliders()
     finished = False
@@ -259,13 +258,13 @@ def loop(game):
         if game.player.death:
             break
         pygame.display.update()
-    draw_menu('assets/menu2.png', -1)
+    draw_menu(LOSE_MENU, -1)
 
 
 def start():
     """запуск игры"""
     screen, font_style, clock = init()
-    player = Player(900, 700, 10, 'assets/player.png')
+    player = Player(900, 700, 10, PLAYER_SPRITES)
     game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 0.2, 10, player, 5))
     game.enemy_controler.spawn_enemy()
     return game
@@ -275,5 +274,5 @@ def game_start():
     loop(game)
 
 if __name__ == '__main__':
-    draw_menu('assets/menubg.png', -1)
+    draw_menu(START_MENU, -1)
 
