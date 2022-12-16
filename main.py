@@ -5,10 +5,8 @@ from player import Player
 from enemy_controller import Enemy_Controller
 from random import randint
 from config import *
-pygame.init()
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-font1 = pygame.font.SysFont(MENU_FONT, 50)
+
 
 
 class Menu:
@@ -39,14 +37,7 @@ class Menu:
 
 
 
-
-
-menu = Menu()
-menu.new_option("start", lambda: game_start())
-menu.new_option("quit", lambda: False)
-
-running = True    
-name = 'legenda'
+  
 
 def get_range(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
@@ -60,15 +51,15 @@ def draw_menu(filename, score):
     """отрисовка меню после смерти"""
     running = True
     while running:
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 running = False
-            elif e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_w:
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
                     menu.switch(-1)
-                elif e.key == pygame.K_s:
+                elif event.key == pygame.K_s:
                     menu.switch(1)
-                elif e.key == pygame.K_SPACE:
+                elif event.key == pygame.K_SPACE:
                     running = menu.select()
         menu_bg = pygame.image.load(filename)
        
@@ -201,11 +192,9 @@ class Game:
 
 def init():
     """Инициализация игры"""
-    pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
     font_style = pygame.font.Font(None, 36)
     clock = pygame.time.Clock()
-    return (screen, font_style, clock)
+    return (font_style, clock)
 
 
 
@@ -256,14 +245,16 @@ def loop(game):
             game.render_level()
             game.add_time()
         if game.player.death:
-            break
-        pygame.display.update()
-    draw_menu(LOSE_MENU, -1)
+            draw_menu(LOSE_MENU, -1) 
+        else:
+            pygame.display.update()
+    pygame.quit()
+    
 
 
 def start():
     """запуск игры"""
-    screen, font_style, clock = init()
+    font_style, clock = init()
     player = Player(900, 700, 10, PLAYER_SPRITES)
     game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 0.2, 10, player, 5))
     game.enemy_controler.spawn_enemy()
@@ -274,5 +265,12 @@ def game_start():
     loop(game)
 
 if __name__ == '__main__':
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    font1 = pygame.font.SysFont(MENU_FONT, 50)
+    menu = Menu()
+    menu.new_option("start", lambda: game_start())
+    menu.new_option("quit", lambda: False)
+    pygame.display.set_caption(GAMENAME)
     draw_menu(START_MENU, -1)
 
