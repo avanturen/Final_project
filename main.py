@@ -60,6 +60,7 @@ def get_direction(x1, y1, x2, y2):
     return direction / np.linalg.norm(direction)
 
 def start_menu():
+    """отрисовка стартового меню"""
     running = True
     while running:
         for e in pygame.event.get():
@@ -80,6 +81,7 @@ def start_menu():
     pygame.quit()
 
 def end_menu():
+    """отрисовка меню после смерти"""
     running = True
     while running:
         for e in pygame.event.get():
@@ -116,17 +118,19 @@ class Game:
         self.score = 0
 
     def parse_colliders(self):
+        """добавление коллизий"""
         with open(self.collider_map) as f:
             for line in f.readlines():
                 line = list(map(int, line.split()))
                 self.colliders.append(pygame.Rect((line[0], line[1], line[2] - line[0], line[3] - line[1])))
 
     def render_level(self):
+        """отрисовка карты"""
         lvl = self.font_style.render(f'Level: {self.player.level}', False, (255, 255, 255))
         self.screen.blit(lvl, (10,190))
 
     def add_lvl_up(self, i):
-        
+        """варианты улучшений"""
         match i:
             case 0:
                 self.player.max_health = int(self.player.max_health * 1.2)
@@ -145,10 +149,12 @@ class Game:
                 self.player.orbits[0].vampire += 0.1
             
     def render_exp(self):
+        """отрисовка уровня игрока"""
         pygame.draw.rect(self.screen, (170, 170, 170), (10, 90, 300, 30), border_radius = 1)
         pygame.draw.rect(self.screen, WHITE, (10, 90, self.player.exp/self.player.exp_for_lvlup * 300, 30))
 
     def collision_handing(self, player, direction):
+        """проверка колллизий"""
         for collider in self.colliders:
             if direction[0] > 0:
                 deltax = player.rect.right - collider.left - direction[0] * player.v
@@ -168,17 +174,21 @@ class Game:
         return direction
 
     def render_score(self):
+        """выыодит на экран текущий счет"""
         health = self.font_style.render(f'Score: {self.score}', False, (255, 255, 255))
         self.screen.blit(health, (10,140))
     def health_render(self):
+        """"выводит на экран здоровье игрока"""
         health = self.font_style.render(f'{int(self.player.health)} / {self.player.max_health}', False, (0, 200, 0))
         self.screen.blit(health, (10,50))
 
     def render_colliders(self):
+        """устонавливает коллизии обЪектов"""
         for collider in self.colliders:
             pygame.draw.rect(self.screen, RED, collider)
 
     def get_direction(self, keys, player):
+        """считывает нажатия клавиш и задаёт направление игроку"""
         direction = np.array([0, 0])
         if keys[pygame.K_s]:
             direction[1] -= 1
@@ -202,7 +212,7 @@ class Game:
 
 
 def init():
-    """Initialize game"""
+    """Инициализация игры"""
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     font_style = pygame.font.Font(None, 36)
@@ -214,6 +224,7 @@ def init():
 
 
 def loop(game):
+    """основной игровой цикл"""
     game._map = pygame.image.load('assets/1level.png').convert_alpha()
     map_pixels = pygame.surfarray.array2d(game._map)
     game.parse_colliders()
@@ -264,6 +275,7 @@ def loop(game):
 
 
 def start():
+    """запуск игры"""
     screen, font_style, clock = init()
     player = Player(900, 700, 10, 'assets/player.png')
     game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 0.2, 10, player, 5))
