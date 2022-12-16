@@ -40,7 +40,6 @@ class Player(pygame.sprite.Sprite):
         self.v = v
         self.level = 1
         self.new_level = 0
-
         self.exp = 0
         self.exp_for_lvlup = 100
         self.sprites = [((10, 3), (65, 3)), ((126, 3), (202, 3), (16, 150)), ((76, 150), (134, 150), (192, 150)), ((17, 293), (83, 293))]

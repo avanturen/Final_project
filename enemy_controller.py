@@ -5,7 +5,6 @@ from random import randint, random
 import numpy as np
 from animations import Animation, Animator
 """Анимации врагов"""
-path = [['assets/enemy-1.png', 'assets/enemy-2.png', 'assets/enemy-3.png'], ['assets/enemy-4.png', 'assets/enemy-5.png', 'assets/enemy-6.png'], ['assets/enemy-7.png', 'assets/enemy-8.png', 'assets/enemy-9.png']]
 
 def get_range(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
@@ -26,7 +25,7 @@ class Enemy:
     def __init__(self, x, y, v, vision_range, health) -> None:
         self.type = randint(0,2)
         self.v =  v/(self.type + 4) * 4
-        self.animator = Animator([get_animation(path[self.type])])
+        self.animator = Animator([get_animation(PATH[self.type])])
         self.vision_range = vision_range
         self.health = health * sqrt(self.type + 1)
         self.direction = [(random() - 1) / 200, (random() - 1) / 200]
