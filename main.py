@@ -1,12 +1,10 @@
 import pygame
 import numpy as np
+
 import camera
 from player import Player
-from enemy_controller import Enemy_Controller
-from random import randint
+from enemy_controller import EnemyController
 from config import *
-
-
 
 
 class Menu:
@@ -34,19 +32,15 @@ class Menu:
             surface.blit(option, option_rect)
 
 
-
-
-
-  
-
 def get_range(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
+
 def get_direction(x1, y1, x2, y2):
-    direction = np.array([x2-x1, y2 - y1])
+    direction = np.array([x2 - x1, y2 - y1])
     return direction / np.linalg.norm(direction)
 
-    
+
 def draw_menu(filename, score):
     """отрисовка меню после смерти"""
     running = True
@@ -62,8 +56,8 @@ def draw_menu(filename, score):
                 elif event.key == pygame.K_SPACE:
                     running = menu.select()
         menu_bg = pygame.image.load(filename)
-       
-        screen.blit(menu_bg, (0,0))
+
+        screen.blit(menu_bg, (0, 0))
         menu.draw(screen, 200, 400, 75)
         if score >= 0:
             text = font1.render(f'Your score: {score}', True, RED)
@@ -74,10 +68,11 @@ def draw_menu(filename, score):
 
 
 class Game:
-    
     colliders = []
     collider_map = COLLIDE_MAP
-    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font, player, enemy_controller) -> None:
+
+    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, spawn_time: int, font_style: pygame.font.Font,
+                 player, enemy_controller) -> None:
         self.lvlups = pygame.image.load(LVLUPS).convert_alpha()
         self.lvlups_list = [(0, 0), (0, 80), (0, 160), (0, 240), (0, 320), (0, 400)]
         self.screen = screen
@@ -99,7 +94,7 @@ class Game:
     def render_level(self):
         """отрисовка карты"""
         lvl = self.font_style.render(f'Level: {self.player.level}', False, (255, 255, 255))
-        self.screen.blit(lvl, (10,190))
+        self.screen.blit(lvl, (10, 190))
 
     def add_lvl_up(self, i):
         """варианты улучшений"""
@@ -119,11 +114,11 @@ class Game:
                 self.player.damage *= 1.1
             case 5:
                 self.player.orbits[0].vampire += 0.1
-            
+
     def render_exp(self):
         """отрисовка уровня игрока"""
-        pygame.draw.rect(self.screen, (170, 170, 170), (10, 90, 300, 30), border_radius = 1)
-        pygame.draw.rect(self.screen, WHITE, (10, 90, self.player.exp/self.player.exp_for_lvlup * 300, 30))
+        pygame.draw.rect(self.screen, (170, 170, 170), (10, 90, 300, 30), border_radius=1)
+        pygame.draw.rect(self.screen, WHITE, (10, 90, self.player.exp / self.player.exp_for_lvlup * 300, 30))
 
     def collision_handing(self, player, direction):
         """проверка колллизий"""
@@ -148,11 +143,12 @@ class Game:
     def render_score(self):
         """выыодит на экран текущий счет"""
         health = self.font_style.render(f'Score: {self.score}', False, (255, 255, 255))
-        self.screen.blit(health, (10,140))
+        self.screen.blit(health, (10, 140))
+
     def health_render(self):
         """"выводит на экран здоровье игрока"""
         health = self.font_style.render(f'{int(self.player.health)} / {self.player.max_health}', False, (0, 200, 0))
-        self.screen.blit(health, (10,50))
+        self.screen.blit(health, (10, 50))
 
     def render_colliders(self):
         """устонавливает коллизии обЪектов"""
@@ -160,11 +156,12 @@ class Game:
             pygame.draw.rect(self.screen, RED, collider)
 
     def add_time(self):
-        self.timer += 1/FPS
+        self.timer += 1 / FPS
         if self.timer >= WIN_TIME:
             draw_menu(WIN_MENU, self.score)
-        time = self.font_style.render(f'Time: {int((WIN_TIME - self.timer) // 60)} : {int((WIN_TIME - self.timer)%60)}', False, (255, 255, 255))
-        self.screen.blit(time, (10,250))
+        time = self.font_style.render(
+            f'Time: {int((WIN_TIME - self.timer) // 60)} : {int((WIN_TIME - self.timer) % 60)}', False, (255, 255, 255))
+        self.screen.blit(time, (10, 250))
 
     def get_direction(self, keys, player):
         """считывает нажатия клавиш и задаёт направление игроку"""
@@ -185,7 +182,7 @@ class Game:
         norm = np.linalg.norm(direction)
         if norm:
             player.animator.start_animation()
-            return direction/norm
+            return direction / norm
         player.animator.stop_animation()
         return direction
 
@@ -195,9 +192,6 @@ def init():
     font_style = pygame.font.Font(None, 36)
     clock = pygame.time.Clock()
     return (font_style, clock)
-
-
-
 
 
 def loop(game):
@@ -212,13 +206,13 @@ def loop(game):
             if event.type == pygame.QUIT:
                 finished = True
         if game.player.new_level == 1:
-            pygame.draw.rect(game.screen, BLACK, (WIDTH/2 - 200, HEIGHT/2 - 150, 400, 300))
+            pygame.draw.rect(game.screen, BLACK, (WIDTH / 2 - 200, HEIGHT / 2 - 150, 400, 300))
             en = list(enumerate(game.lvlups_list))
             np.random.shuffle(en)
             rects = []
             for i in range(3):
-                game.screen.blit(game.lvlups, (WIDTH/2 - 190, HEIGHT/2 - 140 + 100 * i), (*en[i][1], 380, 80))
-                rects.append([en[i][0], pygame.rect.Rect(WIDTH/2 - 190, HEIGHT/2 - 140 + 100 * i, 380, 80)])
+                game.screen.blit(game.lvlups, (WIDTH / 2 - 190, HEIGHT / 2 - 140 + 100 * i), (*en[i][1], 380, 80))
+                rects.append([en[i][0], pygame.rect.Rect(WIDTH / 2 - 190, HEIGHT / 2 - 140 + 100 * i, 380, 80)])
             game.player.new_level = 2
         elif game.player.new_level == 2:
             if pygame.mouse.get_pressed()[0]:
@@ -228,10 +222,12 @@ def loop(game):
                         game.add_lvl_up(i)
                         game.player.new_level = 0
         else:
-            x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x, game.player.rect.y,
-                                                                                map_pixels.shape[0], map_pixels.shape[1])
+            x_to_array, x_to_render, y_to_array, y_to_render = camera.edge_handing(game.player.rect.x,
+                                                                                   game.player.rect.y,
+                                                                                   map_pixels.shape[0],
+                                                                                   map_pixels.shape[1])
             keys = pygame.key.get_pressed()
-            game.enemy_controler.add_time(1/FPS)
+            game.enemy_controler.add_time(1 / FPS)
             game.enemy_controler.wall_handler(game.colliders)
             game.enemy_controler.is_atack()
             game.score += game.enemy_controler.is_atacked()
@@ -245,24 +241,25 @@ def loop(game):
             game.render_level()
             game.add_time()
         if game.player.death:
-            draw_menu(LOSE_MENU, -1) 
+            draw_menu(LOSE_MENU, -1)
         else:
             pygame.display.update()
     pygame.quit()
-    
 
 
 def start():
     """запуск игры"""
     font_style, clock = init()
     player = Player(900, 700, 10, PLAYER_SPRITES)
-    game = Game(screen, clock, 500, font_style, player, Enemy_Controller(screen, 0.2, 10, player, 5))
+    game = Game(screen, clock, 500, font_style, player, EnemyController(screen, 0.2, 10, player, 5))
     game.enemy_controler.spawn_enemy()
     return game
+
 
 def game_start():
     game = start()
     loop(game)
+
 
 if __name__ == '__main__':
     pygame.init()
@@ -273,4 +270,3 @@ if __name__ == '__main__':
     menu.new_option("quit", lambda: False)
     pygame.display.set_caption(GAMENAME)
     draw_menu(START_MENU, -1)
-

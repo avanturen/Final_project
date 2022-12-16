@@ -1,19 +1,20 @@
-class Animation :
+class Animation:
     def __init__(self, animation_sprites, animation_delay) -> None:
         self.animation_sprites = animation_sprites
         self.animation_delay = animation_delay
         self.time = 0
         self.animation_iterator = 0
-    
+
     def add_time(self, delta_time):
         self.time += delta_time
         if self.time > self.animation_delay:
             self.time = self.time % self.animation_delay
             self.animation_iterator += 1
             self.animation_iterator = self.animation_iterator % len(self.animation_sprites)
-    
+
     def get_sprite(self):
         return self.animation_sprites[self.animation_iterator]
+
 
 class Animator:
     def __init__(self, animation_dictionary) -> None:
@@ -27,7 +28,7 @@ class Animator:
     def stop_animation(self):
         self.animated = False
         self.current_animation.animation_iterator = 0
-     
+
     def start_animation(self):
         self.animated = True
 
@@ -36,4 +37,3 @@ class Animator:
             self.current_animation.add_time(delta_time)
         sprite = self.current_animation.get_sprite()
         return sprite
-    

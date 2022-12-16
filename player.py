@@ -1,5 +1,7 @@
 from math import pi, sin, cos
+
 import pygame
+
 from animations import Animation, Animator
 
 
